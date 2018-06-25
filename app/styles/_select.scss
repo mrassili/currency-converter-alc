@@ -1,0 +1,11 @@
+label {
+}
+
+select {
+  width: 100%; // As a side effect the labels position above `select`s
+}
+
+.src-currency, .dest-currency {
+  font-family: 'Source Sans Pro';
+  width: 80%;
+}
