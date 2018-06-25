@@ -1,6 +1,6 @@
-window.addEventListener("load",() => {
+window.addEventListener('load',() => {
   // populate the `select` elements
-  const selectElements = document.getElementsByTagName("select");
+  const selectElements = document.getElementsByTagName('select');
   // Fetch all the currencies from currencyconverterapi
   fetch('https://free.currencyconverterapi.com/api/v5/currencies')
   .then(function(currenciesResp) {
@@ -13,8 +13,7 @@ window.addEventListener("load",() => {
     for (const currency in currenciesJSON.results) {
       currencyName = currenciesJSON.results[currency].currencyName;
       currencyCode = currenciesJSON.results[currency].id;
-      currencySymbol = currenciesJSON.results[currency].currencySymbol;
-      option = document.createElement("option",{id: currencyCode});
+      option = document.createElement('option',{id: currencyCode});
       option.innerText = `${currencyCode} | ${currencyName}`;
       // You can't append a node in two points of the document
       // .cloneNode() makes a copy of the node
