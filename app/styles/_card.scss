@@ -18,7 +18,7 @@
   width: 600px;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr calc(1fr - 30px);
+  grid-template-rows: 1fr 1fr calc(1fr - 30px);
   background: white;
   border-top: 1px solid hsl(0, 0%, 92%);
   align-items: center;
@@ -26,5 +26,15 @@
 }
 
 .card-footer {
+  display: grid;
+  height: auto;
   background: radial-gradient(farthest-corner at top right, $color-primary,darken($color-primary,20%));
+  color: white;
+  font-size: 3em;
+  text-align: center;
+}
+
+.resulting-amount {
+  align-self: center;
+  font-weight: 600;
 }
