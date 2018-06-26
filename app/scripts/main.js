@@ -3,9 +3,7 @@ window.addEventListener('load',() => {
   const selectElements = document.getElementsByTagName('select');
   // Fetch all the currencies from currencyconverterapi
   fetch('https://free.currencyconverterapi.com/api/v5/currencies')
-  .then(function(currenciesResp) {
-    return currenciesResp.json();
-  })
+  .then(currennciesResp => currennciesResp.json())
   .then(function(currenciesJSON) {
       let currencyName;
       let currencyCode;
