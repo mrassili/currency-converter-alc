@@ -54,12 +54,12 @@
         </div>
         <div class="amount-input">
           <label for="amount">Amount</label>
-          <input type="number" id="amount" name="amount" required/>
+          <input type="number" id="js_inputAmount" name="amount" required/>
         </div>
-        <button class="convert-btn">Convert</button>
+        <button class="convert-btn" id="js_convertBtn">Convert</button>
       </div>
       <div class="card-footer">
-        <span class="resulting-amount">USD 1,020</span>
+        <span class="resulting-amount" id="js_resultingAmount">USD 1,020</span>
       </div>
     </div>
   </div>
@@ -75,6 +75,7 @@
 
   <!-- build:js scripts/main.js -->
   <script src="scripts/main.js"></script>
+  <script src="scripts/convert.js"></script>
   <!-- endbuild -->
 </body>
 

@@ -4,6 +4,7 @@
   grid-column: 2/3;
   // style the button from refactoring-ui or css snippets 90sec
   border-radius: 5px;
+  border: 0;
   //border: 2px solid darken($color-primary,20%);
   color: white;
   background: radial-gradient(farthest-corner at top right, $color-primary,darken($color-primary,20%));
