@@ -1,4 +1,4 @@
-// A library for customizing browser alerts
+/* // A library for customizing browser alerts
 //import swal from 'sweetalert2/src/sweetalert2.js';
 
 const convertBtn = document.getElementById('js_convertBtn');
@@ -16,11 +16,7 @@ convertBtn.addEventListener('click', () => {
   .then(rateResp => rateResp.json())
   .then(rate => {
     const rate_value = rate[`${src_currency}_${dest_currency}`];
-    swal(
-      'The Internet?',
-      'That thing is still around?',
-      'question'
-    )
+    
     // convert using the fetched rate
     if(inputAmount.value === '') {
     }
@@ -32,6 +28,6 @@ convertBtn.addEventListener('click', () => {
     }
     catch (ex) {
       console.log(ex.message);
-    } */
+    } 
   });
-});
+}); */
