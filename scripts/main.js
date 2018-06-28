@@ -1,4 +1,3941 @@
-!function(){function n(t,e,o){function a(s,i){if(!e[s]){if(!t[s]){var l="function"==typeof require&&require;if(!i&&l)return l(s,!0);if(r)return r(s,!0);var c=new Error("Cannot find module '"+s+"'");throw c.code="MODULE_NOT_FOUND",c}var u=e[s]={exports:{}};t[s][0].call(u.exports,function(n){return a(t[s][1][n]||n)},u,u.exports,n,t,e,o)}return e[s].exports}for(var r="function"==typeof require&&require,s=0;s<o.length;s++)a(o[s]);return a}return n}()({1:[function(n,t,e){"use strict";function o(n){return n&&n.__esModule?n:{default:n}}var a=n("sweetalert2"),r=o(a),s=n("idb"),i=o(s),l=void 0;window.addEventListener("load",function(){var n=document.getElementsByTagName("select");fetch("https://free.currencyconverterapi.com/api/v5/currencies").then(function(n){return n.json()}).then(function(t){var e=void 0,o=void 0,a=void 0;for(var r in t.results)e=t.results[r].currencyName,o=t.results[r].id,a=document.createElement("option"),a.innerText=o+" | "+e,a.id=o,n[0].appendChild(a.cloneNode(!0)),n[1].appendChild(a)}),"serviceWorker"in navigator&&navigator.serviceWorker.register("./sw.js",{scope:"./"}).then(function(n){}).catch(function(){}),l=i.default.open("currenciesDB",1,function(n){n.createObjectStore("rates",{keyPath:"id"})})});var c=document.getElementById("js_convertBtn"),u=document.getElementById("js_inputAmount"),p=document.getElementById("js_resultingAmount"),d=document.getElementsByTagName("select")[0],w=document.getElementsByTagName("select")[1];c.addEventListener("click",function(){var n=d.options[d.selectedIndex],t=w.options[w.selectedIndex],e=n.id,o=t.id,a=function(n){return fetch("https://free.currencyconverterapi.com/api/v5/convert?q="+e+"_"+o+"&compact=ultra").then(function(n){return n.json()}).then(function(n){var t=n[e+"_"+o];return l.then(function(n){var a=n.transaction("rates","readwrite");return a.objectStore("rates").put({rate:t,id:e+"_"+o}),a.complete}),t}).catch(function(){n||(0,r.default)({type:"error",title:"Oops...",text:"I cannot convert this while offline"})})};if(""===u.value)return void(0,r.default)({type:"error",title:"Oops...",text:"This field cannot be empty"});l.then(function(n){var t=n.transaction("rates").objectStore("rates"),r=void 0;t.openCursor().then(function n(t){if(t)return r=t.value,t.value.id===e+"_"+o||t.continue().then(n)}).then(function(n){if(!n||!r)return a(n).then(function(n){return p.textContent=o+" "+(n*u.value).toFixed(2)});p.textContent=o+" "+(r.rate*u.value).toFixed(2)})}),u.focus()})},{idb:2,sweetalert2:3}],2:[function(n,t,e){"use strict";!function(){function n(n){return Array.prototype.slice.call(n)}function e(n){return new Promise(function(t,e){n.onsuccess=function(){t(n.result)},n.onerror=function(){e(n.error)}})}function o(n,t,o){var a,r=new Promise(function(r,s){a=n[t].apply(n,o),e(a).then(r,s)});return r.request=a,r}function a(n,t,e){var a=o(n,t,e);return a.then(function(n){if(n)return new u(n,a.request)})}function r(n,t,e){e.forEach(function(e){Object.defineProperty(n.prototype,e,{get:function(){return this[t][e]},set:function(n){this[t][e]=n}})})}function s(n,t,e,a){a.forEach(function(a){a in e.prototype&&(n.prototype[a]=function(){return o(this[t],a,arguments)})})}function i(n,t,e,o){o.forEach(function(o){o in e.prototype&&(n.prototype[o]=function(){return this[t][o].apply(this[t],arguments)})})}function l(n,t,e,o){o.forEach(function(o){o in e.prototype&&(n.prototype[o]=function(){return a(this[t],o,arguments)})})}function c(n){this._index=n}function u(n,t){this._cursor=n,this._request=t}function p(n){this._store=n}function d(n){this._tx=n,this.complete=new Promise(function(t,e){n.oncomplete=function(){t()},n.onerror=function(){e(n.error)},n.onabort=function(){e(n.error)}})}function w(n,t,e){this._db=n,this.oldVersion=t,this.transaction=new d(e)}function m(n){this._db=n}r(c,"_index",["name","keyPath","multiEntry","unique"]),s(c,"_index",IDBIndex,["get","getKey","getAll","getAllKeys","count"]),l(c,"_index",IDBIndex,["openCursor","openKeyCursor"]),r(u,"_cursor",["direction","key","primaryKey","value"]),s(u,"_cursor",IDBCursor,["update","delete"]),["advance","continue","continuePrimaryKey"].forEach(function(n){n in IDBCursor.prototype&&(u.prototype[n]=function(){var t=this,o=arguments;return Promise.resolve().then(function(){return t._cursor[n].apply(t._cursor,o),e(t._request).then(function(n){if(n)return new u(n,t._request)})})})}),p.prototype.createIndex=function(){return new c(this._store.createIndex.apply(this._store,arguments))},p.prototype.index=function(){return new c(this._store.index.apply(this._store,arguments))},r(p,"_store",["name","keyPath","indexNames","autoIncrement"]),s(p,"_store",IDBObjectStore,["put","add","delete","clear","get","getAll","getKey","getAllKeys","count"]),l(p,"_store",IDBObjectStore,["openCursor","openKeyCursor"]),i(p,"_store",IDBObjectStore,["deleteIndex"]),d.prototype.objectStore=function(){return new p(this._tx.objectStore.apply(this._tx,arguments))},r(d,"_tx",["objectStoreNames","mode"]),i(d,"_tx",IDBTransaction,["abort"]),w.prototype.createObjectStore=function(){return new p(this._db.createObjectStore.apply(this._db,arguments))},r(w,"_db",["name","version","objectStoreNames"]),i(w,"_db",IDBDatabase,["deleteObjectStore","close"]),m.prototype.transaction=function(){return new d(this._db.transaction.apply(this._db,arguments))},r(m,"_db",["name","version","objectStoreNames"]),i(m,"_db",IDBDatabase,["close"]),["openCursor","openKeyCursor"].forEach(function(t){[p,c].forEach(function(e){t in e.prototype&&(e.prototype[t.replace("open","iterate")]=function(){var e=n(arguments),o=e[e.length-1],a=this._store||this._index,r=a[t].apply(a,e.slice(0,-1));r.onsuccess=function(){o(r.result)}})})}),[c,p].forEach(function(n){n.prototype.getAll||(n.prototype.getAll=function(n,t){var e=this,o=[];return new Promise(function(a){e.iterateCursor(n,function(n){return n?(o.push(n.value),void 0!==t&&o.length==t?void a(o):void n.continue()):void a(o)})})})});var f={open:function(n,t,e){var a=o(indexedDB,"open",[n,t]),r=a.request;return r&&(r.onupgradeneeded=function(n){e&&e(new w(r.result,n.oldVersion,r.transaction))}),a.then(function(n){return new m(n)})},delete:function(n){return o(indexedDB,"deleteDatabase",[n])}};void 0!==t?(t.exports=f,t.exports.default=t.exports):self.idb=f}()},{}],3:[function(n,t,e){!function(n,o){"object"==typeof e&&void 0!==t?t.exports=o():"function"==typeof define&&define.amd?define(o):n.Sweetalert2=o()}(this,function(){"use strict";function n(){for(var n=this,t=arguments.length,e=Array(t),o=0;o<t;o++)e[o]=arguments[o];return new(Function.prototype.bind.apply(n,[null].concat(e)))}function t(n){var t=function n(){for(var t=arguments.length,e=Array(t),o=0;o<t;o++)e[o]=arguments[o];if(!(this instanceof n))return new(Function.prototype.bind.apply(n,[null].concat(e)));Object.getPrototypeOf(n).apply(this,e)};return t.prototype=y(Object.create(n.prototype),{constructor:t}),"function"==typeof Object.setPrototypeOf?Object.setPrototypeOf(t,n):t.__proto__=n,t}function e(n){var e=this;return t(function(t){function e(){return g(this,e),x(this,(e.__proto__||Object.getPrototypeOf(e)).apply(this,arguments))}return k(e,t),b(e,[{key:"_main",value:function(t){return v(e.prototype.__proto__||Object.getPrototypeOf(e.prototype),"_main",this).call(this,y({},n,t))}}]),e}(e))}function o(){var n=$n.innerParams.get(this),t=$n.domCache.get(this);n.showConfirmButton||(X(t.confirmButton),n.showCancelButton||X(t.actions)),R([t.popup,t.actions],q.loading),t.popup.removeAttribute("aria-busy"),t.popup.removeAttribute("data-loading"),t.confirmButton.disabled=!1,t.cancelButton.disabled=!1}function a(n){var t=$n.innerParams.get(this),e=$n.domCache.get(this);if(!(n=n||t.input))return null;switch(n){case"select":case"textarea":case"file":return Z(e.content,q[n]);case"checkbox":return e.popup.querySelector("."+q.checkbox+" input");case"radio":return e.popup.querySelector("."+q.radio+" input:checked")||e.popup.querySelector("."+q.radio+" input:first-child");case"range":return e.popup.querySelector("."+q.range+" input");default:return Z(e.content,q.input)}}function r(){var n=$n.domCache.get(this);n.confirmButton.disabled=!1,n.cancelButton.disabled=!1}function s(){var n=$n.domCache.get(this);n.confirmButton.disabled=!0,n.cancelButton.disabled=!0}function i(){$n.domCache.get(this).confirmButton.disabled=!1}function l(){$n.domCache.get(this).confirmButton.disabled=!0}function c(){var n=this.getInput();if(!n)return!1;if("radio"===n.type)for(var t=n.parentNode.parentNode,e=t.querySelectorAll("input"),o=0;o<e.length;o++)e[o].disabled=!1;else n.disabled=!1}function u(){var n=this.getInput();if(!n)return!1;if(n&&"radio"===n.type)for(var t=n.parentNode.parentNode,e=t.querySelectorAll("input"),o=0;o<e.length;o++)e[o].disabled=!0;else n.disabled=!0}function p(n){var t=$n.domCache.get(this);t.validationError.innerHTML=n;var e=window.getComputedStyle(t.popup);t.validationError.style.marginLeft="-"+e.getPropertyValue("padding-left"),t.validationError.style.marginRight="-"+e.getPropertyValue("padding-right"),K(t.validationError);var o=this.getInput();o&&(o.setAttribute("aria-invalid",!0),o.setAttribute("aria-describedBy",q.validationerror),N(o),Y(o,q.inputerror))}function d(){var n=$n.domCache.get(this);n.validationError&&X(n.validationError);var t=this.getInput();t&&(t.removeAttribute("aria-invalid"),t.removeAttribute("aria-describedBy"),R(t,q.inputerror))}function w(n){n.inputValidator||Object.keys(Qn).forEach(function(t){n.input===t&&(n.inputValidator=n.expectRejections?Qn[t]:tt.adaptInputValidator(Qn[t]))}),(!n.target||"string"==typeof n.target&&!document.querySelector(n.target)||"string"!=typeof n.target&&!n.target.appendChild)&&(E('Target parameter is not valid, defaulting to "body"'),n.target="body");var t=void 0,e=J(),o="string"==typeof n.target?document.querySelector(n.target):n.target;t=e&&o&&e.parentNode!==o.parentNode?bn(n):e||bn(n),n.width&&(t.style.width="number"==typeof n.width?n.width+"px":n.width),n.padding&&(t.style.padding="number"==typeof n.padding?n.padding+"px":n.padding),n.background&&(t.style.background=n.background);for(var a=window.getComputedStyle(t).getPropertyValue("background-color"),r=t.querySelectorAll("[class^=swal2-success-circular-line], .swal2-success-fix"),s=0;s<r.length;s++)r[s].style.backgroundColor=a;var i=F(),l=nn(),c=tn().querySelector("#"+q.content),u=cn(),p=rn(),d=sn(),w=pn(),m=un();if(n.titleText?l.innerText=n.titleText:n.title&&(l.innerHTML=n.title.split("\n").join("<br />")),"string"==typeof n.backdrop?F().style.background=n.backdrop:n.backdrop||Y([document.documentElement,document.body],q["no-backdrop"]),n.html?yn(n.html,c):n.text?(c.textContent=n.text,K(c)):X(c),n.position in q?Y(i,q[n.position]):(E('The "position" parameter is not valid, defaulting to "center"'),Y(i,q.center)),n.grow&&"string"==typeof n.grow){var f="grow-"+n.grow;f in q&&Y(i,q[f])}"function"==typeof n.animation&&(n.animation=n.animation.call()),n.showCloseButton?(w.setAttribute("aria-label",n.closeButtonAriaLabel),K(w)):X(w),t.className=q.popup,n.toast?(Y([document.documentElement,document.body],q["toast-shown"]),Y(t,q.toast)):Y(t,q.modal),n.customClass&&Y(t,n.customClass);var h=on(),g=parseInt(null===n.currentProgressStep?tt.getQueueStep():n.currentProgressStep,10);n.progressSteps&&n.progressSteps.length?(K(h),W(h),g>=n.progressSteps.length&&E("Invalid currentProgressStep parameter, it should be less than progressSteps.length (currentProgressStep like JS arrays starts from 0)"),n.progressSteps.forEach(function(t,e){var o=document.createElement("li");if(Y(o,q.progresscircle),o.innerHTML=t,e===g&&Y(o,q.activeprogressstep),h.appendChild(o),e!==n.progressSteps.length-1){var a=document.createElement("li");Y(a,q.progressline),n.progressStepsDistance&&(a.style.width=n.progressStepsDistance),h.appendChild(a)}})):X(h);for(var b=G(),y=0;y<b.length;y++)X(b[y]);if(n.type){var v=!1;for(var k in D)if(n.type===k){v=!0;break}if(!v)return S("Unknown alert type: "+n.type),!1;var x=t.querySelector("."+q.icon+"."+D[n.type]);K(x),n.animation&&Y(x,"swal2-animate-"+n.type+"-icon")}var C=en();if(n.imageUrl?(C.setAttribute("src",n.imageUrl),C.setAttribute("alt",n.imageAlt),K(C),n.imageWidth?C.setAttribute("width",n.imageWidth):C.removeAttribute("width"),n.imageHeight?C.setAttribute("height",n.imageHeight):C.removeAttribute("height"),C.className=q.image,n.imageClass&&Y(C,n.imageClass)):X(C),n.showCancelButton?d.style.display="inline-block":X(d),n.showConfirmButton?$(p,"display"):X(p),n.showConfirmButton||n.showCancelButton?K(u):X(u),p.innerHTML=n.confirmButtonText,d.innerHTML=n.cancelButtonText,p.setAttribute("aria-label",n.confirmButtonAriaLabel),d.setAttribute("aria-label",n.cancelButtonAriaLabel),p.className=q.confirm,Y(p,n.confirmButtonClass),d.className=q.cancel,Y(d,n.cancelButtonClass),n.buttonsStyling){Y([p,d],q.styled),n.confirmButtonColor&&(p.style.backgroundColor=n.confirmButtonColor),n.cancelButtonColor&&(d.style.backgroundColor=n.cancelButtonColor);var B=window.getComputedStyle(p).getPropertyValue("background-color");p.style.borderLeftColor=B,p.style.borderRightColor=B}else R([p,d],q.styled),p.style.backgroundColor=p.style.borderLeftColor=p.style.borderRightColor="",d.style.backgroundColor=d.style.borderLeftColor=d.style.borderRightColor="";yn(n.footer,m),!0===n.animation?R(t,q.noanimation):Y(t,q.noanimation),n.showLoaderOnConfirm&&!n.preConfirm&&E("showLoaderOnConfirm is set to true, but preConfirm is not defined.\nshowLoaderOnConfirm should be used together with preConfirm, see usage example:\nhttps://sweetalert2.github.io/#ajax-request")}function m(n){var t=this;qn(n);var e=y({},Tn,n);w(e),Object.freeze(e),$n.innerParams.set(this,e),En.timeout&&(En.timeout.stop(),delete En.timeout),clearTimeout(En.restoreFocusTimeout);var o={popup:J(),container:F(),content:tn(),actions:cn(),confirmButton:rn(),cancelButton:sn(),closeButton:pn(),validationError:an(),progressSteps:on()};$n.domCache.set(this,o);var a=this.constructor;return new Promise(function(n,r){var s=function(t){a.closePopup(e.onClose,e.onAfterClose),n(e.useRejections?t:{value:t})},i=function(t){a.closePopup(e.onClose,e.onAfterClose),e.useRejections?r(t):n({dismiss:t})},l=function(n){a.closePopup(e.onClose,e.onAfterClose),r(n)};e.timer&&(En.timeout=new Fn(function(){i("timer"),delete En.timeout},e.timer));var c=function(){var n=t.getInput();if(!n)return null;switch(e.input){case"checkbox":return n.checked?1:0;case"radio":return n.checked?n.value:null;case"file":return n.files.length?n.files[0]:null;default:return e.inputAutoTrim?n.value.trim():n.value}};e.input&&setTimeout(function(){var n=t.getInput();n&&N(n)},0);for(var u=function(n){if(e.showLoaderOnConfirm&&a.showLoading(),e.preConfirm){t.resetValidationError();var r=Promise.resolve().then(function(){return e.preConfirm(n,e.extraParams)});e.expectRejections?r.then(function(t){return s(t||n)},function(n){t.hideLoading(),n&&t.showValidationError(n)}):r.then(function(e){U(o.validationError)||!1===e?t.hideLoading():s(e||n)},function(n){return l(n)})}else s(n)},p=function(n){var r=n||window.event,s=r.target||r.srcElement,p=o.confirmButton,d=o.cancelButton,w=p&&(p===s||p.contains(s)),m=d&&(d===s||d.contains(s));switch(r.type){case"click":if(w&&a.isVisible())if(t.disableButtons(),e.input){var f=c();if(e.inputValidator){t.disableInput();var h=Promise.resolve().then(function(){return e.inputValidator(f,e.extraParams)});e.expectRejections?h.then(function(){t.enableButtons(),t.enableInput(),u(f)},function(n){t.enableButtons(),t.enableInput(),n&&t.showValidationError(n)}):h.then(function(n){t.enableButtons(),t.enableInput(),n?t.showValidationError(n):u(f)},function(n){return l(n)})}else u(f)}else u(!0);else m&&a.isVisible()&&(t.disableButtons(),i(a.DismissReason.cancel))}},d=o.popup.querySelectorAll("button"),w=0;w<d.length;w++)d[w].onclick=p,d[w].onmouseover=p,d[w].onmouseout=p,d[w].onmousedown=p;if(o.closeButton.onclick=function(){i(a.DismissReason.close)},e.toast)o.popup.onclick=function(n){e.showConfirmButton||e.showCancelButton||e.showCloseButton||e.input||(a.closePopup(e.onClose,e.onAfterClose),i(a.DismissReason.close))};else{var m=!1;o.popup.onmousedown=function(){o.container.onmouseup=function(n){o.container.onmouseup=void 0,n.target===o.container&&(m=!0)}},o.container.onmousedown=function(){o.popup.onmouseup=function(n){o.popup.onmouseup=void 0,(n.target===o.popup||o.popup.contains(n.target))&&(m=!0)}},o.container.onclick=function(n){if(m)return void(m=!1);n.target===o.container&&_(e.allowOutsideClick)&&i(a.DismissReason.backdrop)}}e.reverseButtons?o.confirmButton.parentNode.insertBefore(o.cancelButton,o.confirmButton):o.confirmButton.parentNode.insertBefore(o.confirmButton,o.cancelButton);var f=function(n,t){for(var a=dn(e.focusCancel),r=0;r<a.length;r++){n+=t,n===a.length?n=0:-1===n&&(n=a.length-1);var s=a[n];if(U(s))return s.focus()}o.popup.focus()},g=function(n,e){e.stopKeydownPropagation&&n.stopPropagation();var r=["ArrowLeft","ArrowRight","ArrowUp","ArrowDown","Left","Right","Up","Down"];if("Enter"!==n.key||n.isComposing)if("Tab"===n.key){for(var s=n.target||n.srcElement,l=dn(e.focusCancel),c=-1,u=0;u<l.length;u++)if(s===l[u]){c=u;break}n.shiftKey?f(c,-1):f(c,1),n.stopPropagation(),n.preventDefault()}else-1!==r.indexOf(n.key)?document.activeElement===o.confirmButton&&U(o.cancelButton)?o.cancelButton.focus():document.activeElement===o.cancelButton&&U(o.confirmButton)&&o.confirmButton.focus():"Escape"!==n.key&&"Esc"!==n.key||!0!==_(e.allowEscapeKey)||i(a.DismissReason.esc);else if(n.target&&t.getInput()&&n.target.outerHTML===t.getInput().outerHTML){if(-1!==["textarea","file"].indexOf(e.input))return;a.clickConfirm(),n.preventDefault()}};En.keydownHandlerAdded&&(En.keydownTarget.removeEventListener("keydown",En.keydownHandler,{capture:En.keydownListenerCapture}),En.keydownHandlerAdded=!1),e.toast||(En.keydownHandler=function(n){return g(n,e)},En.keydownTarget=e.keydownListenerCapture?window:o.popup,En.keydownListenerCapture=e.keydownListenerCapture,En.keydownTarget.addEventListener("keydown",En.keydownHandler,{capture:En.keydownListenerCapture}),En.keydownHandlerAdded=!0),t.enableButtons(),t.hideLoading(),t.resetValidationError(),e.input&&Y(document.body,q["has-input"]);for(var b=["input","file","range","select","radio","checkbox","textarea"],y=void 0,v=0;v<b.length;v++){var k=q[b[v]],x=Z(o.content,k);if(y=t.getInput(b[v])){for(var B in y.attributes)if(y.attributes.hasOwnProperty(B)){var E=y.attributes[B].name;"type"!==E&&"value"!==E&&y.removeAttribute(E)}for(var j in e.inputAttributes)y.setAttribute(j,e.inputAttributes[j])}x.className=k,e.inputClass&&Y(x,e.inputClass),X(x)}var P=void 0;switch(e.input){case"text":case"email":case"password":case"number":case"tel":case"url":y=Z(o.content,q.input),y.value=e.inputValue,y.placeholder=e.inputPlaceholder,y.type=e.input,K(y);break;case"file":y=Z(o.content,q.file),y.placeholder=e.inputPlaceholder,y.type=e.input,K(y);break;case"range":var T=Z(o.content,q.range),L=T.querySelector("input"),I=T.querySelector("output");L.value=e.inputValue,L.type=e.input,I.value=e.inputValue,K(T);break;case"select":var z=Z(o.content,q.select);if(z.innerHTML="",e.inputPlaceholder){var D=document.createElement("option");D.innerHTML=e.inputPlaceholder,D.value="",D.disabled=!0,D.selected=!0,z.appendChild(D)}P=function(n){n.forEach(function(n){var t=C(n,2),o=t[0],a=t[1],r=document.createElement("option");r.value=o,r.innerHTML=a,e.inputValue.toString()===o.toString()&&(r.selected=!0),z.appendChild(r)}),K(z),z.focus()};break;case"radio":var V=Z(o.content,q.radio);V.innerHTML="",P=function(n){n.forEach(function(n){var t=C(n,2),o=t[0],a=t[1],r=document.createElement("input"),s=document.createElement("label");r.type="radio",r.name=q.radio,r.value=o,e.inputValue.toString()===o.toString()&&(r.checked=!0),s.innerHTML=a,s.insertBefore(r,s.firstChild),V.appendChild(s)}),K(V);var t=V.querySelectorAll("input");t.length&&t[0].focus()};break;case"checkbox":var M=Z(o.content,q.checkbox),H=t.getInput("checkbox");H.type="checkbox",H.value=1,H.id=q.checkbox,H.checked=Boolean(e.inputValue);var R=M.getElementsByTagName("span");R.length&&M.removeChild(R[0]),R=document.createElement("span"),R.innerHTML=e.inputPlaceholder,M.appendChild(R),K(M);break;case"textarea":var W=Z(o.content,q.textarea);W.value=e.inputValue,W.placeholder=e.inputPlaceholder,K(W);break;case null:break;default:S('Unexpected type of input! Expected "text", "email", "password", "number", "tel", "select", "radio", "checkbox", "textarea", "file" or "url", got "'+e.input+'"')}if("select"===e.input||"radio"===e.input){var $=function(n){return P(A(n))};O(e.inputOptions)?(a.showLoading(),e.inputOptions.then(function(n){t.hideLoading(),$(n)})):"object"===h(e.inputOptions)?$(e.inputOptions):S("Unexpected type of inputOptions! Expected object, Map or Promise, got "+h(e.inputOptions))}else-1!==["text","email","number","tel","textarea"].indexOf(e.input)&&O(e.inputValue)&&(a.showLoading(),X(y),e.inputValue.then(function(n){y.value="number"===e.input?parseFloat(n)||0:n+"",K(y),t.hideLoading()}).catch(function(n){S("Error in inputValue promise: "+n),y.value="",K(y),t.hideLoading()}));Jn(e),e.toast||(_(e.allowEnterKey)?e.focusCancel&&U(o.cancelButton)?o.cancelButton.focus():e.focusConfirm&&U(o.confirmButton)?o.confirmButton.focus():f(-1,1):document.activeElement&&document.activeElement.blur()),o.container.scrollTop=0})}function f(){if("undefined"!=typeof window){"undefined"==typeof Promise&&S("This package requires a Promise library, please include a shim to enable it in this browser (See: https://github.com/sweetalert2/sweetalert2/wiki/Migration-from-SweetAlert-to-SweetAlert2#1-ie-support)");for(var n=arguments.length,t=Array(n),e=0;e<n;e++)t[e]=arguments[e];if(void 0===t[0])return S("SweetAlert2 expects at least 1 attribute!"),!1;nt=this;var o=Object.freeze(this.constructor.argsToParams(t));Object.defineProperties(this,{params:{value:o,writable:!1,enumerable:!0}});var a=this._main(this.params);$n.promise.set(this,a)}}var h="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(n){return typeof n}:function(n){return n&&"function"==typeof Symbol&&n.constructor===Symbol&&n!==Symbol.prototype?"symbol":typeof n},g=function(n,t){if(!(n instanceof t))throw new TypeError("Cannot call a class as a function")},b=function(){function n(n,t){for(var e=0;e<t.length;e++){var o=t[e];o.enumerable=o.enumerable||!1,o.configurable=!0,"value"in o&&(o.writable=!0),Object.defineProperty(n,o.key,o)}}return function(t,e,o){return e&&n(t.prototype,e),o&&n(t,o),t}}(),y=Object.assign||function(n){for(var t=1;t<arguments.length;t++){var e=arguments[t];for(var o in e)Object.prototype.hasOwnProperty.call(e,o)&&(n[o]=e[o])}return n},v=function n(t,e,o){null===t&&(t=Function.prototype);var a=Object.getOwnPropertyDescriptor(t,e);if(void 0===a){var r=Object.getPrototypeOf(t);return null===r?void 0:n(r,e,o)}if("value"in a)return a.value;var s=a.get;if(void 0!==s)return s.call(o)},k=function(n,t){if("function"!=typeof t&&null!==t)throw new TypeError("Super expression must either be null or a function, not "+typeof t);n.prototype=Object.create(t&&t.prototype,{constructor:{value:n,enumerable:!1,writable:!0,configurable:!0}}),t&&(Object.setPrototypeOf?Object.setPrototypeOf(n,t):n.__proto__=t)},x=function(n,t){if(!n)throw new ReferenceError("this hasn't been initialised - super() hasn't been called");return!t||"object"!=typeof t&&"function"!=typeof t?n:t},C=function(){function n(n,t){var e=[],o=!0,a=!1,r=void 0;try{for(var s,i=n[Symbol.iterator]();!(o=(s=i.next()).done)&&(e.push(s.value),!t||e.length!==t);o=!0);}catch(n){a=!0,r=n}finally{try{!o&&i.return&&i.return()}finally{if(a)throw r}}return e}return function(t,e){if(Array.isArray(t))return t;if(Symbol.iterator in Object(t))return n(t,e);throw new TypeError("Invalid attempt to destructure non-iterable instance")}}(),B=function(n){for(var t=[],e=0;e<n.length;e++)-1===t.indexOf(n[e])&&t.push(n[e]);return t},A=function(n){var t=[];return"undefined"!=typeof Map&&n instanceof Map?n.forEach(function(n,e){t.push([e,n])}):Object.keys(n).forEach(function(e){t.push([e,n[e]])}),t},E=function(n){},S=function(n){},j=[],P=function(n){-1===j.indexOf(n)&&(j.push(n),E(n))},_=function(n){return"function"==typeof n?n():n},O=function(n){return"object"===(void 0===n?"undefined":h(n))&&"function"==typeof n.then},T=Object.freeze({cancel:"cancel",backdrop:"overlay",close:"close",esc:"esc",timer:"timer"}),L=function(n){var t={};switch(h(n[0])){case"string":["title","html","type"].forEach(function(e,o){switch(h(n[o])){case"string":t[e]=n[o];break;case"undefined":break;default:S("Unexpected type of "+e+'! Expected "string", got '+h(n[o]))}});break;case"object":y(t,n[0]);break;default:return S('Unexpected type of argument! Expected "string" or "object", got '+h(n[0])),!1}return t},I=function(n){return function(t,e){return n.call(this,t,e).then(function(){},function(n){return n})}},z=function(n){var t={};for(var e in n)t[n[e]]="swal2-"+n[e];return t},q=z(["container","shown","height-auto","iosfix","popup","modal","no-backdrop","toast","toast-shown","fade","show","hide","noanimation","close","title","header","content","actions","confirm","cancel","footer","icon","icon-text","image","input","has-input","file","range","select","radio","checkbox","textarea","inputerror","validationerror","progresssteps","activeprogressstep","progresscircle","progressline","loading","styled","top","top-start","top-end","top-left","top-right","center","center-start","center-end","center-left","center-right","bottom","bottom-start","bottom-end","bottom-left","bottom-right","grow-row","grow-column","grow-fullscreen"]),D=z(["success","warning","info","question","error"]),V={previousBodyPadding:null},M=function(n,t){return!!n.classList&&n.classList.contains(t)},N=function(n){if(n.focus(),"file"!==n.type){var t=n.value;n.value="",n.value=t}},H=function(n,t,e){n&&t&&("string"==typeof t&&(t=t.split(/\s+/).filter(Boolean)),t.forEach(function(t){n.forEach?n.forEach(function(n){e?n.classList.add(t):n.classList.remove(t)}):e?n.classList.add(t):n.classList.remove(t)}))},Y=function(n,t){H(n,t,!0)},R=function(n,t){H(n,t,!1)},Z=function(n,t){for(var e=0;e<n.childNodes.length;e++)if(M(n.childNodes[e],t))return n.childNodes[e]},K=function(n){n.style.opacity="",n.style.display=n.id===q.content?"block":"flex"},X=function(n){n.style.opacity="",n.style.display="none"},W=function(n){for(;n.firstChild;)n.removeChild(n.firstChild)},U=function(n){return n&&(n.offsetWidth||n.offsetHeight||n.getClientRects().length)},$=function(n,t){n.style.removeProperty?n.style.removeProperty(t):n.style.removeAttribute(t)},F=function(){return document.body.querySelector("."+q.container)},Q=function(n){var t=F();return t?t.querySelector("."+n):null},J=function(){return Q(q.popup)},G=function(){return J().querySelectorAll("."+q.icon)},nn=function(){return Q(q.title)},tn=function(){return Q(q.content)},en=function(){return Q(q.image)},on=function(){return Q(q.progresssteps)},an=function(){return Q(q.validationerror)},rn=function(){return Q(q.confirm)},sn=function(){return Q(q.cancel)},ln=function(){return P("swal.getButtonsWrapper() is deprecated and will be removed in the next major release, use swal.getActions() instead"),Q(q.actions)},cn=function(){return Q(q.actions)},un=function(){return Q(q.footer)},pn=function(){return Q(q.close)},dn=function(){var n=Array.prototype.slice.call(J().querySelectorAll('[tabindex]:not([tabindex="-1"]):not([tabindex="0"])')).sort(function(n,t){return n=parseInt(n.getAttribute("tabindex")),t=parseInt(t.getAttribute("tabindex")),n>t?1:n<t?-1:0}),t=Array.prototype.slice.call(J().querySelectorAll('a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, [tabindex="0"], [contenteditable], audio[controls], video[controls]'));return B(n.concat(t))},wn=function(){return!document.body.classList.contains(q["toast-shown"])},mn=function(){return document.body.classList.contains(q["toast-shown"])},fn=function(){return J().hasAttribute("data-loading")},hn=function(){return"undefined"==typeof window||"undefined"==typeof document},gn=('\n <div aria-labelledby="'+q.title+'" aria-describedby="'+q.content+'" class="'+q.popup+'" tabindex="-1">\n   <div class="'+q.header+'">\n     <ul class="'+q.progresssteps+'"></ul>\n     <div class="'+q.icon+" "+D.error+'">\n       <span class="swal2-x-mark"><span class="swal2-x-mark-line-left"></span><span class="swal2-x-mark-line-right"></span></span>\n     </div>\n     <div class="'+q.icon+" "+D.question+'">\n       <span class="'+q["icon-text"]+'">?</span>\n      </div>\n     <div class="'+q.icon+" "+D.warning+'">\n       <span class="'+q["icon-text"]+'">!</span>\n      </div>\n     <div class="'+q.icon+" "+D.info+'">\n       <span class="'+q["icon-text"]+'">i</span>\n      </div>\n     <div class="'+q.icon+" "+D.success+'">\n       <div class="swal2-success-circular-line-left"></div>\n       <span class="swal2-success-line-tip"></span> <span class="swal2-success-line-long"></span>\n       <div class="swal2-success-ring"></div> <div class="swal2-success-fix"></div>\n       <div class="swal2-success-circular-line-right"></div>\n     </div>\n     <img class="'+q.image+'" />\n     <h2 class="'+q.title+'" id="'+q.title+'"></h2>\n     <button type="button" class="'+q.close+'">×</button>\n   </div>\n   <div class="'+q.content+'">\n     <div id="'+q.content+'"></div>\n     <input class="'+q.input+'" />\n     <input type="file" class="'+q.file+'" />\n     <div class="'+q.range+'">\n       <input type="range" />\n       <output></output>\n     </div>\n     <select class="'+q.select+'"></select>\n     <div class="'+q.radio+'"></div>\n     <label for="'+q.checkbox+'" class="'+q.checkbox+'">\n       <input type="checkbox" />\n     </label>\n     <textarea class="'+q.textarea+'"></textarea>\n     <div class="'+q.validationerror+'" id="'+q.validationerror+'"></div>\n   </div>\n   <div class="'+q.actions+'">\n     <button type="button" class="'+q.confirm+'">OK</button>\n     <button type="button" class="'+q.cancel+'">Cancel</button>\n   </div>\n   <div class="'+q.footer+'">\n   </div>\n </div>\n').replace(/(^|\n)\s*/g,""),bn=function(n){var t=F();if(t&&(t.parentNode.removeChild(t),R([document.documentElement,document.body],[q["no-backdrop"],q["has-input"],q["toast-shown"]])),hn())return void S("SweetAlert2 requires document to initialize");var e=document.createElement("div");e.className=q.container,e.innerHTML=gn,("string"==typeof n.target?document.querySelector(n.target):n.target).appendChild(e);var o=J(),a=tn(),r=Z(a,q.input),s=Z(a,q.file),i=a.querySelector("."+q.range+" input"),l=a.querySelector("."+q.range+" output"),c=Z(a,q.select),u=a.querySelector("."+q.checkbox+" input"),p=Z(a,q.textarea);o.setAttribute("role",n.toast?"alert":"dialog"),o.setAttribute("aria-live",n.toast?"polite":"assertive"),n.toast||o.setAttribute("aria-modal","true");var d=void 0,w=function(n){tt.isVisible()&&d!==n.target.value&&tt.resetValidationError(),d=n.target.value};return r.oninput=w,s.onchange=w,c.onchange=w,u.onchange=w,p.oninput=w,i.oninput=function(n){w(n),l.value=i.value},i.onchange=function(n){w(n),i.nextSibling.value=i.value},o},yn=function(n,t){if(!n)return X(t);if("object"===(void 0===n?"undefined":h(n)))if(t.innerHTML="",0 in n)for(var e=0;e in n;e++)t.appendChild(n[e].cloneNode(!0));else t.appendChild(n.cloneNode(!0));else n&&(t.innerHTML=n);K(t)},vn=function(){if(hn())return!1;var n=document.createElement("div"),t={WebkitAnimation:"webkitAnimationEnd",OAnimation:"oAnimationEnd oanimationend",animation:"animationend"};for(var e in t)if(t.hasOwnProperty(e)&&void 0!==n.style[e])return t[e];return!1}(),kn=function(){if("ontouchstart"in window||navigator.msMaxTouchPoints)return 0;var n=document.createElement("div");n.style.width="50px",n.style.height="50px",n.style.overflow="scroll",document.body.appendChild(n);var t=n.offsetWidth-n.clientWidth;return document.body.removeChild(n),t},xn=function(){
-null===V.previousBodyPadding&&document.body.scrollHeight>window.innerHeight&&(V.previousBodyPadding=parseInt(window.getComputedStyle(document.body).getPropertyValue("padding-right")),document.body.style.paddingRight=V.previousBodyPadding+kn()+"px")},Cn=function(){null!==V.previousBodyPadding&&(document.body.style.paddingRight=V.previousBodyPadding,V.previousBodyPadding=null)},Bn=function(){if(/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream&&!M(document.body,q.iosfix)){var n=document.body.scrollTop;document.body.style.top=-1*n+"px",Y(document.body,q.iosfix)}},An=function(){if(M(document.body,q.iosfix)){var n=parseInt(document.body.style.top,10);R(document.body,q.iosfix),document.body.style.top="",document.body.scrollTop=-1*n}},En={},Sn=function(){var n=window.scrollX,t=window.scrollY;En.restoreFocusTimeout=setTimeout(function(){En.previousActiveElement&&En.previousActiveElement.focus&&(En.previousActiveElement.focus(),En.previousActiveElement=null)},100),void 0!==n&&void 0!==t&&window.scrollTo(n,t)},jn=function(n,t){var e=F(),o=J();if(o){null!==n&&"function"==typeof n&&n(o),R(o,q.show),Y(o,q.hide);var a=function(){mn()||(Sn(),En.keydownTarget.removeEventListener("keydown",En.keydownHandler,{capture:En.keydownListenerCapture}),En.keydownHandlerAdded=!1),e.parentNode&&e.parentNode.removeChild(e),R([document.documentElement,document.body],[q.shown,q["height-auto"],q["no-backdrop"],q["has-input"],q["toast-shown"]]),wn()&&(Cn(),An()),null!==t&&"function"==typeof t&&setTimeout(function(){t()})};vn&&!M(o,q.noanimation)?o.addEventListener(vn,function n(){o.removeEventListener(vn,n),M(o,q.hide)&&a()}):a()}},Pn=function(){return!!J()},_n=function(){return rn().click()},On=function(){return sn().click()},Tn={title:"",titleText:"",text:"",html:"",footer:"",type:null,toast:!1,customClass:"",target:"body",backdrop:!0,animation:!0,heightAuto:!0,allowOutsideClick:!0,allowEscapeKey:!0,allowEnterKey:!0,stopKeydownPropagation:!0,keydownListenerCapture:!1,showConfirmButton:!0,showCancelButton:!1,preConfirm:null,confirmButtonText:"OK",confirmButtonAriaLabel:"",confirmButtonColor:null,confirmButtonClass:null,cancelButtonText:"Cancel",cancelButtonAriaLabel:"",cancelButtonColor:null,cancelButtonClass:null,buttonsStyling:!0,reverseButtons:!1,focusConfirm:!0,focusCancel:!1,showCloseButton:!1,closeButtonAriaLabel:"Close this dialog",showLoaderOnConfirm:!1,imageUrl:null,imageWidth:null,imageHeight:null,imageAlt:"",imageClass:null,timer:null,width:null,padding:null,background:null,input:null,inputPlaceholder:"",inputValue:"",inputOptions:{},inputAutoTrim:!0,inputClass:null,inputAttributes:{},inputValidator:null,grow:!1,position:"center",progressSteps:[],currentProgressStep:null,progressStepsDistance:null,onBeforeOpen:null,onAfterClose:null,onOpen:null,onClose:null,useRejections:!1,expectRejections:!1},Ln=["useRejections","expectRejections"],In=function(n){return Tn.hasOwnProperty(n)||"extraParams"===n},zn=function(n){return-1!==Ln.indexOf(n)},qn=function(n){for(var t in n)In(t)||E('Unknown parameter "'+t+'"'),zn(t)&&P('The parameter "'+t+'" is deprecated and will be removed in the next major release.')},Dn='"setDefaults" & "resetDefaults" methods are deprecated in favor of "mixin" method and will be removed in the next major release. For new projects, use "mixin". For past projects already using "setDefaults", support will be provided through an additional package.',Vn={},Mn=[],Nn=function(n){var t=this;Mn=n;var e=function(){Mn=[],document.body.removeAttribute("data-swal2-queue-step")},o=[];return new Promise(function(n,a){!function a(r,s){r<Mn.length?(document.body.setAttribute("data-swal2-queue-step",r),t(Mn[r]).then(function(t){void 0!==t.value?(o.push(t.value),a(r+1,s)):(e(),n({dismiss:t.dismiss}))})):(e(),n({value:o}))}(0)})},Hn=function(){return document.body.getAttribute("data-swal2-queue-step")},Yn=function(n,t){return t&&t<Mn.length?Mn.splice(t,0,n):Mn.push(n)},Rn=function(n){void 0!==Mn[n]&&Mn.splice(n,1)},Zn=function(){var n=J();n||tt(""),n=J();var t=cn(),e=rn(),o=sn();K(t),K(e),Y([n,t],q.loading),e.disabled=!0,o.disabled=!0,n.setAttribute("data-loading",!0),n.setAttribute("aria-busy",!0),n.focus()},Kn=function(){return En.timeout&&En.timeout.getTimerLeft()},Xn=Object.freeze({isValidParameter:In,isDeprecatedParameter:zn,argsToParams:L,adaptInputValidator:I,close:jn,closePopup:jn,closeModal:jn,closeToast:jn,isVisible:Pn,clickConfirm:_n,clickCancel:On,getPopup:J,getTitle:nn,getContent:tn,getImage:en,getButtonsWrapper:ln,getActions:cn,getConfirmButton:rn,getCancelButton:sn,getFooter:un,isLoading:fn,fire:n,mixin:e,queue:Nn,getQueueStep:Hn,insertQueueStep:Yn,deleteQueueStep:Rn,showLoading:Zn,enableLoading:Zn,getTimerLeft:Kn}),Wn="function"==typeof Symbol?Symbol:function(){function n(n){return"__"+n+"_"+Math.floor(1e9*Math.random())+"_"+ ++t+"__"}var t=0;return n.iterator=n("Symbol.iterator"),n}(),Un="function"==typeof WeakMap?WeakMap:function(n,t,e){function o(){t(this,n,{value:Wn("WeakMap")})}return o.prototype={delete:function(t){delete t[this[n]]},get:function(t){return t[this[n]]},has:function(t){return e.call(t,this[n])},set:function(e,o){t(e,this[n],{configurable:!0,value:o})}},o}(Wn("WeakMap"),Object.defineProperty,{}.hasOwnProperty),$n={promise:new Un,innerParams:new Un,domCache:new Un},Fn=function n(t,e){g(this,n);var o,a,r,s=e;this.start=function(){r=!0,a=new Date,o=setTimeout(t,s)},this.stop=function(){r=!1,clearTimeout(o),s-=new Date-a},this.getTimerLeft=function(){return r&&(this.stop(),this.start()),s},this.getStateRunning=function(){return r},this.start()},Qn={email:function(n,t){return/^[a-zA-Z0-9.+_-]+@[a-zA-Z0-9.-]+\.[a-zA-Z0-9-]{2,24}$/.test(n)?Promise.resolve():Promise.reject(t&&t.validationMessage?t.validationMessage:"Invalid email address")},url:function(n,t){return/^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&\/\/=]*)$/.test(n)?Promise.resolve():Promise.reject(t&&t.validationMessage?t.validationMessage:"Invalid URL")}},Jn=function(n){var t=F(),e=J();null!==n.onBeforeOpen&&"function"==typeof n.onBeforeOpen&&n.onBeforeOpen(e),n.animation?(Y(e,q.show),Y(t,q.fade),R(e,q.hide)):R(e,q.fade),K(e),t.style.overflowY="hidden",vn&&!M(e,q.noanimation)?e.addEventListener(vn,function n(){e.removeEventListener(vn,n),t.style.overflowY="auto"}):t.style.overflowY="auto",Y([document.documentElement,document.body,t],q.shown),n.heightAuto&&n.backdrop&&!n.toast&&Y([document.documentElement,document.body],q["height-auto"]),wn()&&(xn(),Bn()),En.previousActiveElement||(En.previousActiveElement=document.activeElement),null!==n.onOpen&&"function"==typeof n.onOpen&&setTimeout(function(){n.onOpen(e)})},Gn=Object.freeze({hideLoading:o,disableLoading:o,getInput:a,enableButtons:r,disableButtons:s,enableConfirmButton:i,disableConfirmButton:l,enableInput:c,disableInput:u,showValidationError:p,resetValidationError:d,_main:m}),nt=void 0;f.prototype.then=function(n,t){return $n.promise.get(this).then(n,t)},f.prototype.catch=function(n){return $n.promise.get(this).catch(n)},f.prototype.finally=function(n){return $n.promise.get(this).finally(n)},y(f.prototype,Gn),y(f,Xn),Object.keys(Gn).forEach(function(n){f[n]=function(){if(nt){var t;return(t=nt)[n].apply(t,arguments)}}}),f.DismissReason=T,f.noop=function(){},f.version="7.24.2";var tt=t(function(n){var t=function(t){function e(){return g(this,e),x(this,(e.__proto__||Object.getPrototypeOf(e)).apply(this,arguments))}return k(e,t),b(e,[{key:"_main",value:function(n){return v(e.prototype.__proto__||Object.getPrototypeOf(e.prototype),"_main",this).call(this,y({},Vn,n))}}],[{key:"setDefaults",value:function(t){if(P(Dn),!t||"object"!==(void 0===t?"undefined":h(t)))throw new TypeError("SweetAlert2: The argument for setDefaults() is required and has to be a object");qn(t),Object.keys(t).forEach(function(e){n.isValidParameter(e)&&(Vn[e]=t[e])})}},{key:"resetDefaults",value:function(){P(Dn),Vn={}}}]),e}(n);return"undefined"!=typeof window&&"object"===h(window._swalDefaults)&&t.setDefaults(window._swalDefaults),t}(f));return tt.default=tt,tt}),"undefined"!=typeof window&&window.Sweetalert2&&(window.swal=window.sweetAlert=window.Swal=window.SweetAlert=window.Sweetalert2),"undefined"!=typeof document&&function(n,t){var e=n.createElement("style");if(n.getElementsByTagName("head")[0].appendChild(e),e.styleSheet)e.styleSheet.disabled||(e.styleSheet.cssText=t);else try{e.innerHTML=t}catch(n){e.innerText=t}
-}(document,"@-webkit-keyframes swal2-show {\n  0% {\n    -webkit-transform: scale(0.7);\n            transform: scale(0.7); }\n  45% {\n    -webkit-transform: scale(1.05);\n            transform: scale(1.05); }\n  80% {\n    -webkit-transform: scale(0.95);\n            transform: scale(0.95); }\n  100% {\n    -webkit-transform: scale(1);\n            transform: scale(1); } }\n\n@keyframes swal2-show {\n  0% {\n    -webkit-transform: scale(0.7);\n            transform: scale(0.7); }\n  45% {\n    -webkit-transform: scale(1.05);\n            transform: scale(1.05); }\n  80% {\n    -webkit-transform: scale(0.95);\n            transform: scale(0.95); }\n  100% {\n    -webkit-transform: scale(1);\n            transform: scale(1); } }\n\n@-webkit-keyframes swal2-hide {\n  0% {\n    -webkit-transform: scale(1);\n            transform: scale(1);\n    opacity: 1; }\n  100% {\n    -webkit-transform: scale(0.5);\n            transform: scale(0.5);\n    opacity: 0; } }\n\n@keyframes swal2-hide {\n  0% {\n    -webkit-transform: scale(1);\n            transform: scale(1);\n    opacity: 1; }\n  100% {\n    -webkit-transform: scale(0.5);\n            transform: scale(0.5);\n    opacity: 0; } }\n\n@-webkit-keyframes swal2-animate-success-line-tip {\n  0% {\n    top: 1.1875em;\n    left: .0625em;\n    width: 0; }\n  54% {\n    top: 1.0625em;\n    left: .125em;\n    width: 0; }\n  70% {\n    top: 2.1875em;\n    left: -.375em;\n    width: 3.125em; }\n  84% {\n    top: 3em;\n    left: 1.3125em;\n    width: 1.0625em; }\n  100% {\n    top: 2.8125em;\n    left: .875em;\n    width: 1.5625em; } }\n\n@keyframes swal2-animate-success-line-tip {\n  0% {\n    top: 1.1875em;\n    left: .0625em;\n    width: 0; }\n  54% {\n    top: 1.0625em;\n    left: .125em;\n    width: 0; }\n  70% {\n    top: 2.1875em;\n    left: -.375em;\n    width: 3.125em; }\n  84% {\n    top: 3em;\n    left: 1.3125em;\n    width: 1.0625em; }\n  100% {\n    top: 2.8125em;\n    left: .875em;\n    width: 1.5625em; } }\n\n@-webkit-keyframes swal2-animate-success-line-long {\n  0% {\n    top: 3.375em;\n    right: 2.875em;\n    width: 0; }\n  65% {\n    top: 3.375em;\n    right: 2.875em;\n    width: 0; }\n  84% {\n    top: 2.1875em;\n    right: 0;\n    width: 3.4375em; }\n  100% {\n    top: 2.375em;\n    right: .5em;\n    width: 2.9375em; } }\n\n@keyframes swal2-animate-success-line-long {\n  0% {\n    top: 3.375em;\n    right: 2.875em;\n    width: 0; }\n  65% {\n    top: 3.375em;\n    right: 2.875em;\n    width: 0; }\n  84% {\n    top: 2.1875em;\n    right: 0;\n    width: 3.4375em; }\n  100% {\n    top: 2.375em;\n    right: .5em;\n    width: 2.9375em; } }\n\n@-webkit-keyframes swal2-rotate-success-circular-line {\n  0% {\n    -webkit-transform: rotate(-45deg);\n            transform: rotate(-45deg); }\n  5% {\n    -webkit-transform: rotate(-45deg);\n            transform: rotate(-45deg); }\n  12% {\n    -webkit-transform: rotate(-405deg);\n            transform: rotate(-405deg); }\n  100% {\n    -webkit-transform: rotate(-405deg);\n            transform: rotate(-405deg); } }\n\n@keyframes swal2-rotate-success-circular-line {\n  0% {\n    -webkit-transform: rotate(-45deg);\n            transform: rotate(-45deg); }\n  5% {\n    -webkit-transform: rotate(-45deg);\n            transform: rotate(-45deg); }\n  12% {\n    -webkit-transform: rotate(-405deg);\n            transform: rotate(-405deg); }\n  100% {\n    -webkit-transform: rotate(-405deg);\n            transform: rotate(-405deg); } }\n\n@-webkit-keyframes swal2-animate-error-x-mark {\n  0% {\n    margin-top: 1.625em;\n    -webkit-transform: scale(0.4);\n            transform: scale(0.4);\n    opacity: 0; }\n  50% {\n    margin-top: 1.625em;\n    -webkit-transform: scale(0.4);\n            transform: scale(0.4);\n    opacity: 0; }\n  80% {\n    margin-top: -.375em;\n    -webkit-transform: scale(1.15);\n            transform: scale(1.15); }\n  100% {\n    margin-top: 0;\n    -webkit-transform: scale(1);\n            transform: scale(1);\n    opacity: 1; } }\n\n@keyframes swal2-animate-error-x-mark {\n  0% {\n    margin-top: 1.625em;\n    -webkit-transform: scale(0.4);\n            transform: scale(0.4);\n    opacity: 0; }\n  50% {\n    margin-top: 1.625em;\n    -webkit-transform: scale(0.4);\n            transform: scale(0.4);\n    opacity: 0; }\n  80% {\n    margin-top: -.375em;\n    -webkit-transform: scale(1.15);\n            transform: scale(1.15); }\n  100% {\n    margin-top: 0;\n    -webkit-transform: scale(1);\n            transform: scale(1);\n    opacity: 1; } }\n\n@-webkit-keyframes swal2-animate-error-icon {\n  0% {\n    -webkit-transform: rotateX(100deg);\n            transform: rotateX(100deg);\n    opacity: 0; }\n  100% {\n    -webkit-transform: rotateX(0deg);\n            transform: rotateX(0deg);\n    opacity: 1; } }\n\n@keyframes swal2-animate-error-icon {\n  0% {\n    -webkit-transform: rotateX(100deg);\n            transform: rotateX(100deg);\n    opacity: 0; }\n  100% {\n    -webkit-transform: rotateX(0deg);\n            transform: rotateX(0deg);\n    opacity: 1; } }\n\nbody.swal2-toast-shown.swal2-has-input > .swal2-container > .swal2-toast {\n  flex-direction: column;\n  align-items: stretch; }\n  body.swal2-toast-shown.swal2-has-input > .swal2-container > .swal2-toast .swal2-actions {\n    flex: 1;\n    align-self: stretch;\n    justify-content: flex-end;\n    height: 2.2em; }\n  body.swal2-toast-shown.swal2-has-input > .swal2-container > .swal2-toast .swal2-loading {\n    justify-content: center; }\n  body.swal2-toast-shown.swal2-has-input > .swal2-container > .swal2-toast .swal2-input {\n    height: 2em;\n    margin: .3125em auto;\n    font-size: 1em; }\n  body.swal2-toast-shown.swal2-has-input > .swal2-container > .swal2-toast .swal2-validationerror {\n    font-size: 1em; }\n\nbody.swal2-toast-shown > .swal2-container {\n  position: fixed;\n  background-color: transparent; }\n  body.swal2-toast-shown > .swal2-container.swal2-shown {\n    background-color: transparent; }\n  body.swal2-toast-shown > .swal2-container.swal2-top {\n    top: 0;\n    right: auto;\n    bottom: auto;\n    left: 50%;\n    -webkit-transform: translateX(-50%);\n            transform: translateX(-50%); }\n  body.swal2-toast-shown > .swal2-container.swal2-top-end, body.swal2-toast-shown > .swal2-container.swal2-top-right {\n    top: 0;\n    right: 0;\n    bottom: auto;\n    left: auto; }\n  body.swal2-toast-shown > .swal2-container.swal2-top-start, body.swal2-toast-shown > .swal2-container.swal2-top-left {\n    top: 0;\n    right: auto;\n    bottom: auto;\n    left: 0; }\n  body.swal2-toast-shown > .swal2-container.swal2-center-start, body.swal2-toast-shown > .swal2-container.swal2-center-left {\n    top: 50%;\n    right: auto;\n    bottom: auto;\n    left: 0;\n    -webkit-transform: translateY(-50%);\n            transform: translateY(-50%); }\n  body.swal2-toast-shown > .swal2-container.swal2-center {\n    top: 50%;\n    right: auto;\n    bottom: auto;\n    left: 50%;\n    -webkit-transform: translate(-50%, -50%);\n            transform: translate(-50%, -50%); }\n  body.swal2-toast-shown > .swal2-container.swal2-center-end, body.swal2-toast-shown > .swal2-container.swal2-center-right {\n    top: 50%;\n    right: 0;\n    bottom: auto;\n    left: auto;\n    -webkit-transform: translateY(-50%);\n            transform: translateY(-50%); }\n  body.swal2-toast-shown > .swal2-container.swal2-bottom-start, body.swal2-toast-shown > .swal2-container.swal2-bottom-left {\n    top: auto;\n    right: auto;\n    bottom: 0;\n    left: 0; }\n  body.swal2-toast-shown > .swal2-container.swal2-bottom {\n    top: auto;\n    right: auto;\n    bottom: 0;\n    left: 50%;\n    -webkit-transform: translateX(-50%);\n            transform: translateX(-50%); }\n  body.swal2-toast-shown > .swal2-container.swal2-bottom-end, body.swal2-toast-shown > .swal2-container.swal2-bottom-right {\n    top: auto;\n    right: 0;\n    bottom: 0;\n    left: auto; }\n\n.swal2-popup.swal2-toast {\n  flex-direction: row;\n  align-items: center;\n  width: auto;\n  padding: 0.625em;\n  box-shadow: 0 0 0.625em #d9d9d9;\n  overflow-y: hidden; }\n  .swal2-popup.swal2-toast .swal2-header {\n    flex-direction: row; }\n  .swal2-popup.swal2-toast .swal2-title {\n    justify-content: flex-start;\n    margin: 0 .6em;\n    font-size: 1em; }\n  .swal2-popup.swal2-toast .swal2-close {\n    position: initial; }\n  .swal2-popup.swal2-toast .swal2-content {\n    justify-content: flex-start;\n    font-size: 1em; }\n  .swal2-popup.swal2-toast .swal2-icon {\n    width: 2em;\n    min-width: 2em;\n    height: 2em;\n    margin: 0; }\n    .swal2-popup.swal2-toast .swal2-icon-text {\n      font-size: 2em;\n      font-weight: bold;\n      line-height: 1em; }\n    .swal2-popup.swal2-toast .swal2-icon.swal2-success .swal2-success-ring {\n      width: 2em;\n      height: 2em; }\n    .swal2-popup.swal2-toast .swal2-icon.swal2-error [class^='swal2-x-mark-line'] {\n      top: .875em;\n      width: 1.375em; }\n      .swal2-popup.swal2-toast .swal2-icon.swal2-error [class^='swal2-x-mark-line'][class$='left'] {\n        left: .3125em; }\n      .swal2-popup.swal2-toast .swal2-icon.swal2-error [class^='swal2-x-mark-line'][class$='right'] {\n        right: .3125em; }\n  .swal2-popup.swal2-toast .swal2-actions {\n    height: auto;\n    margin: 0 .3125em; }\n  .swal2-popup.swal2-toast .swal2-styled {\n    margin: 0 .3125em;\n    padding: .3125em .625em;\n    font-size: 1em; }\n    .swal2-popup.swal2-toast .swal2-styled:focus {\n      box-shadow: 0 0 0 0.0625em #fff, 0 0 0 0.125em rgba(50, 100, 150, 0.4); }\n  .swal2-popup.swal2-toast .swal2-success {\n    border-color: #a5dc86; }\n    .swal2-popup.swal2-toast .swal2-success [class^='swal2-success-circular-line'] {\n      position: absolute;\n      width: 2em;\n      height: 2.8125em;\n      -webkit-transform: rotate(45deg);\n              transform: rotate(45deg);\n      border-radius: 50%; }\n      .swal2-popup.swal2-toast .swal2-success [class^='swal2-success-circular-line'][class$='left'] {\n        top: -.25em;\n        left: -.9375em;\n        -webkit-transform: rotate(-45deg);\n                transform: rotate(-45deg);\n        -webkit-transform-origin: 2em 2em;\n                transform-origin: 2em 2em;\n        border-radius: 4em 0 0 4em; }\n      .swal2-popup.swal2-toast .swal2-success [class^='swal2-success-circular-line'][class$='right'] {\n        top: -.25em;\n        left: .9375em;\n        -webkit-transform-origin: 0 2em;\n                transform-origin: 0 2em;\n        border-radius: 0 4em 4em 0; }\n    .swal2-popup.swal2-toast .swal2-success .swal2-success-ring {\n      width: 2em;\n      height: 2em; }\n    .swal2-popup.swal2-toast .swal2-success .swal2-success-fix {\n      top: 0;\n      left: .4375em;\n      width: .4375em;\n      height: 2.6875em; }\n    .swal2-popup.swal2-toast .swal2-success [class^='swal2-success-line'] {\n      height: .3125em; }\n      .swal2-popup.swal2-toast .swal2-success [class^='swal2-success-line'][class$='tip'] {\n        top: 1.125em;\n        left: .1875em;\n        width: .75em; }\n      .swal2-popup.swal2-toast .swal2-success [class^='swal2-success-line'][class$='long'] {\n        top: .9375em;\n        right: .1875em;\n        width: 1.375em; }\n  .swal2-popup.swal2-toast.swal2-show {\n    -webkit-animation: showSweetToast .5s;\n            animation: showSweetToast .5s; }\n  .swal2-popup.swal2-toast.swal2-hide {\n    -webkit-animation: hideSweetToast .2s forwards;\n            animation: hideSweetToast .2s forwards; }\n  .swal2-popup.swal2-toast .swal2-animate-success-icon .swal2-success-line-tip {\n    -webkit-animation: animate-toast-success-tip .75s;\n            animation: animate-toast-success-tip .75s; }\n  .swal2-popup.swal2-toast .swal2-animate-success-icon .swal2-success-line-long {\n    -webkit-animation: animate-toast-success-long .75s;\n            animation: animate-toast-success-long .75s; }\n\n@-webkit-keyframes showSweetToast {\n  0% {\n    -webkit-transform: translateY(-0.625em) rotateZ(2deg);\n            transform: translateY(-0.625em) rotateZ(2deg);\n    opacity: 0; }\n  33% {\n    -webkit-transform: translateY(0) rotateZ(-2deg);\n            transform: translateY(0) rotateZ(-2deg);\n    opacity: .5; }\n  66% {\n    -webkit-transform: translateY(0.3125em) rotateZ(2deg);\n            transform: translateY(0.3125em) rotateZ(2deg);\n    opacity: .7; }\n  100% {\n    -webkit-transform: translateY(0) rotateZ(0);\n            transform: translateY(0) rotateZ(0);\n    opacity: 1; } }\n\n@keyframes showSweetToast {\n  0% {\n    -webkit-transform: translateY(-0.625em) rotateZ(2deg);\n            transform: translateY(-0.625em) rotateZ(2deg);\n    opacity: 0; }\n  33% {\n    -webkit-transform: translateY(0) rotateZ(-2deg);\n            transform: translateY(0) rotateZ(-2deg);\n    opacity: .5; }\n  66% {\n    -webkit-transform: translateY(0.3125em) rotateZ(2deg);\n            transform: translateY(0.3125em) rotateZ(2deg);\n    opacity: .7; }\n  100% {\n    -webkit-transform: translateY(0) rotateZ(0);\n            transform: translateY(0) rotateZ(0);\n    opacity: 1; } }\n\n@-webkit-keyframes hideSweetToast {\n  0% {\n    opacity: 1; }\n  33% {\n    opacity: .5; }\n  100% {\n    -webkit-transform: rotateZ(1deg);\n            transform: rotateZ(1deg);\n    opacity: 0; } }\n\n@keyframes hideSweetToast {\n  0% {\n    opacity: 1; }\n  33% {\n    opacity: .5; }\n  100% {\n    -webkit-transform: rotateZ(1deg);\n            transform: rotateZ(1deg);\n    opacity: 0; } }\n\n@-webkit-keyframes animate-toast-success-tip {\n  0% {\n    top: .5625em;\n    left: .0625em;\n    width: 0; }\n  54% {\n    top: .125em;\n    left: .125em;\n    width: 0; }\n  70% {\n    top: .625em;\n    left: -.25em;\n    width: 1.625em; }\n  84% {\n    top: 1.0625em;\n    left: .75em;\n    width: .5em; }\n  100% {\n    top: 1.125em;\n    left: .1875em;\n    width: .75em; } }\n\n@keyframes animate-toast-success-tip {\n  0% {\n    top: .5625em;\n    left: .0625em;\n    width: 0; }\n  54% {\n    top: .125em;\n    left: .125em;\n    width: 0; }\n  70% {\n    top: .625em;\n    left: -.25em;\n    width: 1.625em; }\n  84% {\n    top: 1.0625em;\n    left: .75em;\n    width: .5em; }\n  100% {\n    top: 1.125em;\n    left: .1875em;\n    width: .75em; } }\n\n@-webkit-keyframes animate-toast-success-long {\n  0% {\n    top: 1.625em;\n    right: 1.375em;\n    width: 0; }\n  65% {\n    top: 1.25em;\n    right: .9375em;\n    width: 0; }\n  84% {\n    top: .9375em;\n    right: 0;\n    width: 1.125em; }\n  100% {\n    top: .9375em;\n    right: .1875em;\n    width: 1.375em; } }\n\n@keyframes animate-toast-success-long {\n  0% {\n    top: 1.625em;\n    right: 1.375em;\n    width: 0; }\n  65% {\n    top: 1.25em;\n    right: .9375em;\n    width: 0; }\n  84% {\n    top: .9375em;\n    right: 0;\n    width: 1.125em; }\n  100% {\n    top: .9375em;\n    right: .1875em;\n    width: 1.375em; } }\n\nbody.swal2-shown:not(.swal2-no-backdrop):not(.swal2-toast-shown) {\n  overflow-y: hidden; }\n\nbody.swal2-height-auto {\n  height: auto !important; }\n\nbody.swal2-no-backdrop .swal2-shown {\n  top: auto;\n  right: auto;\n  bottom: auto;\n  left: auto;\n  background-color: transparent; }\n  body.swal2-no-backdrop .swal2-shown > .swal2-modal {\n    box-shadow: 0 0 10px rgba(0, 0, 0, 0.4); }\n  body.swal2-no-backdrop .swal2-shown.swal2-top {\n    top: 0;\n    left: 50%;\n    -webkit-transform: translateX(-50%);\n            transform: translateX(-50%); }\n  body.swal2-no-backdrop .swal2-shown.swal2-top-start, body.swal2-no-backdrop .swal2-shown.swal2-top-left {\n    top: 0;\n    left: 0; }\n  body.swal2-no-backdrop .swal2-shown.swal2-top-end, body.swal2-no-backdrop .swal2-shown.swal2-top-right {\n    top: 0;\n    right: 0; }\n  body.swal2-no-backdrop .swal2-shown.swal2-center {\n    top: 50%;\n    left: 50%;\n    -webkit-transform: translate(-50%, -50%);\n            transform: translate(-50%, -50%); }\n  body.swal2-no-backdrop .swal2-shown.swal2-center-start, body.swal2-no-backdrop .swal2-shown.swal2-center-left {\n    top: 50%;\n    left: 0;\n    -webkit-transform: translateY(-50%);\n            transform: translateY(-50%); }\n  body.swal2-no-backdrop .swal2-shown.swal2-center-end, body.swal2-no-backdrop .swal2-shown.swal2-center-right {\n    top: 50%;\n    right: 0;\n    -webkit-transform: translateY(-50%);\n            transform: translateY(-50%); }\n  body.swal2-no-backdrop .swal2-shown.swal2-bottom {\n    bottom: 0;\n    left: 50%;\n    -webkit-transform: translateX(-50%);\n            transform: translateX(-50%); }\n  body.swal2-no-backdrop .swal2-shown.swal2-bottom-start, body.swal2-no-backdrop .swal2-shown.swal2-bottom-left {\n    bottom: 0;\n    left: 0; }\n  body.swal2-no-backdrop .swal2-shown.swal2-bottom-end, body.swal2-no-backdrop .swal2-shown.swal2-bottom-right {\n    right: 0;\n    bottom: 0; }\n\n.swal2-container {\n  display: flex;\n  position: fixed;\n  top: 0;\n  right: 0;\n  bottom: 0;\n  left: 0;\n  flex-direction: row;\n  align-items: center;\n  justify-content: center;\n  padding: 10px;\n  background-color: transparent;\n  z-index: 1060;\n  overflow-x: hidden;\n  -webkit-overflow-scrolling: touch; }\n  .swal2-container.swal2-top {\n    align-items: flex-start; }\n  .swal2-container.swal2-top-start, .swal2-container.swal2-top-left {\n    align-items: flex-start;\n    justify-content: flex-start; }\n  .swal2-container.swal2-top-end, .swal2-container.swal2-top-right {\n    align-items: flex-start;\n    justify-content: flex-end; }\n  .swal2-container.swal2-center {\n    align-items: center; }\n  .swal2-container.swal2-center-start, .swal2-container.swal2-center-left {\n    align-items: center;\n    justify-content: flex-start; }\n  .swal2-container.swal2-center-end, .swal2-container.swal2-center-right {\n    align-items: center;\n    justify-content: flex-end; }\n  .swal2-container.swal2-bottom {\n    align-items: flex-end; }\n  .swal2-container.swal2-bottom-start, .swal2-container.swal2-bottom-left {\n    align-items: flex-end;\n    justify-content: flex-start; }\n  .swal2-container.swal2-bottom-end, .swal2-container.swal2-bottom-right {\n    align-items: flex-end;\n    justify-content: flex-end; }\n  .swal2-container.swal2-grow-fullscreen > .swal2-modal {\n    display: flex !important;\n    flex: 1;\n    align-self: stretch;\n    justify-content: center; }\n  .swal2-container.swal2-grow-row > .swal2-modal {\n    display: flex !important;\n    flex: 1;\n    align-content: center;\n    justify-content: center; }\n  .swal2-container.swal2-grow-column {\n    flex: 1;\n    flex-direction: column; }\n    .swal2-container.swal2-grow-column.swal2-top, .swal2-container.swal2-grow-column.swal2-center, .swal2-container.swal2-grow-column.swal2-bottom {\n      align-items: center; }\n    .swal2-container.swal2-grow-column.swal2-top-start, .swal2-container.swal2-grow-column.swal2-center-start, .swal2-container.swal2-grow-column.swal2-bottom-start, .swal2-container.swal2-grow-column.swal2-top-left, .swal2-container.swal2-grow-column.swal2-center-left, .swal2-container.swal2-grow-column.swal2-bottom-left {\n      align-items: flex-start; }\n    .swal2-container.swal2-grow-column.swal2-top-end, .swal2-container.swal2-grow-column.swal2-center-end, .swal2-container.swal2-grow-column.swal2-bottom-end, .swal2-container.swal2-grow-column.swal2-top-right, .swal2-container.swal2-grow-column.swal2-center-right, .swal2-container.swal2-grow-column.swal2-bottom-right {\n      align-items: flex-end; }\n    .swal2-container.swal2-grow-column > .swal2-modal {\n      display: flex !important;\n      flex: 1;\n      align-content: center;\n      justify-content: center; }\n  .swal2-container:not(.swal2-top):not(.swal2-top-start):not(.swal2-top-end):not(.swal2-top-left):not(.swal2-top-right):not(.swal2-center-start):not(.swal2-center-end):not(.swal2-center-left):not(.swal2-center-right):not(.swal2-bottom):not(.swal2-bottom-start):not(.swal2-bottom-end):not(.swal2-bottom-left):not(.swal2-bottom-right) > .swal2-modal {\n    margin: auto; }\n  @media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {\n    .swal2-container .swal2-modal {\n      margin: 0 !important; } }\n  .swal2-container.swal2-fade {\n    transition: background-color .1s; }\n  .swal2-container.swal2-shown {\n    background-color: rgba(0, 0, 0, 0.4); }\n\n.swal2-popup {\n  display: none;\n  position: relative;\n  flex-direction: column;\n  justify-content: center;\n  width: 32em;\n  max-width: 100%;\n  padding: 1.25em;\n  border-radius: 0.3125em;\n  background: #fff;\n  font-family: inherit;\n  font-size: 1rem;\n  box-sizing: border-box; }\n  .swal2-popup:focus {\n    outline: none; }\n  .swal2-popup.swal2-loading {\n    overflow-y: hidden; }\n  .swal2-popup .swal2-header {\n    display: flex;\n    flex-direction: column;\n    align-items: center; }\n  .swal2-popup .swal2-title {\n    display: block;\n    position: relative;\n    max-width: 100%;\n    margin: 0 0 0.4em;\n    padding: 0;\n    color: #595959;\n    font-size: 1.875em;\n    font-weight: 600;\n    text-align: center;\n    text-transform: none;\n    word-wrap: break-word; }\n  .swal2-popup .swal2-actions {\n    align-items: center;\n    justify-content: center;\n    margin: 1.25em auto 0; }\n    .swal2-popup .swal2-actions:not(.swal2-loading) .swal2-styled[disabled] {\n      opacity: .4; }\n    .swal2-popup .swal2-actions:not(.swal2-loading) .swal2-styled:hover {\n      background-image: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1)); }\n    .swal2-popup .swal2-actions:not(.swal2-loading) .swal2-styled:active {\n      background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)); }\n    .swal2-popup .swal2-actions.swal2-loading .swal2-styled.swal2-confirm {\n      width: 2.5em;\n      height: 2.5em;\n      margin: .46875em;\n      padding: 0;\n      border: .25em solid transparent;\n      border-radius: 100%;\n      border-color: transparent;\n      background-color: transparent !important;\n      color: transparent;\n      cursor: default;\n      box-sizing: border-box;\n      -webkit-animation: swal2-rotate-loading 1.5s linear 0s infinite normal;\n              animation: swal2-rotate-loading 1.5s linear 0s infinite normal;\n      -webkit-user-select: none;\n         -moz-user-select: none;\n          -ms-user-select: none;\n              user-select: none; }\n    .swal2-popup .swal2-actions.swal2-loading .swal2-styled.swal2-cancel {\n      margin-right: 30px;\n      margin-left: 30px; }\n    .swal2-popup .swal2-actions.swal2-loading :not(.swal2-styled).swal2-confirm::after {\n      display: inline-block;\n      width: 15px;\n      height: 15px;\n      margin-left: 5px;\n      border: 3px solid #999999;\n      border-radius: 50%;\n      border-right-color: transparent;\n      box-shadow: 1px 1px 1px #fff;\n      content: '';\n      -webkit-animation: swal2-rotate-loading 1.5s linear 0s infinite normal;\n              animation: swal2-rotate-loading 1.5s linear 0s infinite normal; }\n  .swal2-popup .swal2-styled {\n    margin: 0 .3125em;\n    padding: .625em 2em;\n    font-weight: 500;\n    box-shadow: none; }\n    .swal2-popup .swal2-styled:not([disabled]) {\n      cursor: pointer; }\n    .swal2-popup .swal2-styled.swal2-confirm {\n      border: 0;\n      border-radius: 0.25em;\n      background: initial;\n      background-color: #3085d6;\n      color: #fff;\n      font-size: 1.0625em; }\n    .swal2-popup .swal2-styled.swal2-cancel {\n      border: 0;\n      border-radius: 0.25em;\n      background: initial;\n      background-color: #aaa;\n      color: #fff;\n      font-size: 1.0625em; }\n    .swal2-popup .swal2-styled:focus {\n      outline: none;\n      box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgba(50, 100, 150, 0.4); }\n    .swal2-popup .swal2-styled::-moz-focus-inner {\n      border: 0; }\n  .swal2-popup .swal2-footer {\n    justify-content: center;\n    margin: 1.25em 0 0;\n    padding-top: 1em;\n    border-top: 1px solid #eee;\n    color: #545454;\n    font-size: 1em; }\n  .swal2-popup .swal2-image {\n    max-width: 100%;\n    margin: 1.25em auto; }\n  .swal2-popup .swal2-close {\n    position: absolute;\n    top: 0;\n    right: 0;\n    justify-content: center;\n    width: 1.2em;\n    height: 1.2em;\n    padding: 0;\n    transition: color 0.1s ease-out;\n    border: none;\n    border-radius: 0;\n    background: transparent;\n    color: #cccccc;\n    font-family: serif;\n    font-size: 2.5em;\n    line-height: 1.2;\n    cursor: pointer;\n    overflow: hidden; }\n    .swal2-popup .swal2-close:hover {\n      -webkit-transform: none;\n              transform: none;\n      color: #f27474; }\n  .swal2-popup > .swal2-input,\n  .swal2-popup > .swal2-file,\n  .swal2-popup > .swal2-textarea,\n  .swal2-popup > .swal2-select,\n  .swal2-popup > .swal2-radio,\n  .swal2-popup > .swal2-checkbox {\n    display: none; }\n  .swal2-popup .swal2-content {\n    justify-content: center;\n    margin: 0;\n    padding: 0;\n    color: #545454;\n    font-size: 1.125em;\n    font-weight: 300;\n    line-height: normal;\n    word-wrap: break-word; }\n  .swal2-popup #swal2-content {\n    text-align: center; }\n  .swal2-popup .swal2-input,\n  .swal2-popup .swal2-file,\n  .swal2-popup .swal2-textarea,\n  .swal2-popup .swal2-select,\n  .swal2-popup .swal2-radio,\n  .swal2-popup .swal2-checkbox {\n    margin: 1em auto; }\n  .swal2-popup .swal2-input,\n  .swal2-popup .swal2-file,\n  .swal2-popup .swal2-textarea {\n    width: 100%;\n    transition: border-color .3s, box-shadow .3s;\n    border: 1px solid #d9d9d9;\n    border-radius: 0.1875em;\n    font-size: 1.125em;\n    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.06);\n    box-sizing: border-box; }\n    .swal2-popup .swal2-input.swal2-inputerror,\n    .swal2-popup .swal2-file.swal2-inputerror,\n    .swal2-popup .swal2-textarea.swal2-inputerror {\n      border-color: #f27474 !important;\n      box-shadow: 0 0 2px #f27474 !important; }\n    .swal2-popup .swal2-input:focus,\n    .swal2-popup .swal2-file:focus,\n    .swal2-popup .swal2-textarea:focus {\n      border: 1px solid #b4dbed;\n      outline: none;\n      box-shadow: 0 0 3px #c4e6f5; }\n    .swal2-popup .swal2-input::-webkit-input-placeholder,\n    .swal2-popup .swal2-file::-webkit-input-placeholder,\n    .swal2-popup .swal2-textarea::-webkit-input-placeholder {\n      color: #cccccc; }\n    .swal2-popup .swal2-input:-ms-input-placeholder,\n    .swal2-popup .swal2-file:-ms-input-placeholder,\n    .swal2-popup .swal2-textarea:-ms-input-placeholder {\n      color: #cccccc; }\n    .swal2-popup .swal2-input::-ms-input-placeholder,\n    .swal2-popup .swal2-file::-ms-input-placeholder,\n    .swal2-popup .swal2-textarea::-ms-input-placeholder {\n      color: #cccccc; }\n    .swal2-popup .swal2-input::placeholder,\n    .swal2-popup .swal2-file::placeholder,\n    .swal2-popup .swal2-textarea::placeholder {\n      color: #cccccc; }\n  .swal2-popup .swal2-range input {\n    width: 80%; }\n  .swal2-popup .swal2-range output {\n    width: 20%;\n    font-weight: 600;\n    text-align: center; }\n  .swal2-popup .swal2-range input,\n  .swal2-popup .swal2-range output {\n    height: 2.625em;\n    margin: 1em auto;\n    padding: 0;\n    font-size: 1.125em;\n    line-height: 2.625em; }\n  .swal2-popup .swal2-input {\n    height: 2.625em;\n    padding: 0.75em; }\n    .swal2-popup .swal2-input[type='number'] {\n      max-width: 10em; }\n  .swal2-popup .swal2-file {\n    font-size: 1.125em; }\n  .swal2-popup .swal2-textarea {\n    height: 6.75em;\n    padding: 0.75em; }\n  .swal2-popup .swal2-select {\n    min-width: 50%;\n    max-width: 100%;\n    padding: .375em .625em;\n    color: #545454;\n    font-size: 1.125em; }\n  .swal2-popup .swal2-radio,\n  .swal2-popup .swal2-checkbox {\n    align-items: center;\n    justify-content: center; }\n    .swal2-popup .swal2-radio label,\n    .swal2-popup .swal2-checkbox label {\n      margin: 0 .6em;\n      font-size: 1.125em; }\n    .swal2-popup .swal2-radio input,\n    .swal2-popup .swal2-checkbox input {\n      margin: 0 .4em; }\n  .swal2-popup .swal2-validationerror {\n    display: none;\n    align-items: center;\n    justify-content: center;\n    padding: 0.625em;\n    background: #f0f0f0;\n    color: #666666;\n    font-size: 1em;\n    font-weight: 300;\n    overflow: hidden; }\n    .swal2-popup .swal2-validationerror::before {\n      display: inline-block;\n      width: 1.5em;\n      min-width: 1.5em;\n      height: 1.5em;\n      margin: 0 .625em;\n      border-radius: 50%;\n      background-color: #f27474;\n      color: #fff;\n      font-weight: 600;\n      line-height: 1.5em;\n      text-align: center;\n      content: '!';\n      zoom: normal; }\n\n@supports (-ms-accelerator: true) {\n  .swal2-range input {\n    width: 100% !important; }\n  .swal2-range output {\n    display: none; } }\n\n@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {\n  .swal2-range input {\n    width: 100% !important; }\n  .swal2-range output {\n    display: none; } }\n\n@-moz-document url-prefix() {\n  .swal2-close:focus {\n    outline: 2px solid rgba(50, 100, 150, 0.4); } }\n\n.swal2-icon {\n  position: relative;\n  justify-content: center;\n  width: 5em;\n  height: 5em;\n  margin: 1.25em auto 1.875em;\n  border: .25em solid transparent;\n  border-radius: 50%;\n  line-height: 5em;\n  cursor: default;\n  box-sizing: content-box;\n  -webkit-user-select: none;\n     -moz-user-select: none;\n      -ms-user-select: none;\n          user-select: none;\n  zoom: normal; }\n  .swal2-icon-text {\n    font-size: 3.75em; }\n  .swal2-icon.swal2-error {\n    border-color: #f27474; }\n    .swal2-icon.swal2-error .swal2-x-mark {\n      position: relative;\n      flex-grow: 1; }\n    .swal2-icon.swal2-error [class^='swal2-x-mark-line'] {\n      display: block;\n      position: absolute;\n      top: 2.3125em;\n      width: 2.9375em;\n      height: .3125em;\n      border-radius: .125em;\n      background-color: #f27474; }\n      .swal2-icon.swal2-error [class^='swal2-x-mark-line'][class$='left'] {\n        left: 1.0625em;\n        -webkit-transform: rotate(45deg);\n                transform: rotate(45deg); }\n      .swal2-icon.swal2-error [class^='swal2-x-mark-line'][class$='right'] {\n        right: 1em;\n        -webkit-transform: rotate(-45deg);\n                transform: rotate(-45deg); }\n  .swal2-icon.swal2-warning {\n    border-color: #facea8;\n    color: #f8bb86; }\n  .swal2-icon.swal2-info {\n    border-color: #9de0f6;\n    color: #3fc3ee; }\n  .swal2-icon.swal2-question {\n    border-color: #c9dae1;\n    color: #87adbd; }\n  .swal2-icon.swal2-success {\n    border-color: #a5dc86; }\n    .swal2-icon.swal2-success [class^='swal2-success-circular-line'] {\n      position: absolute;\n      width: 3.75em;\n      height: 7.5em;\n      -webkit-transform: rotate(45deg);\n              transform: rotate(45deg);\n      border-radius: 50%; }\n      .swal2-icon.swal2-success [class^='swal2-success-circular-line'][class$='left'] {\n        top: -.4375em;\n        left: -2.0635em;\n        -webkit-transform: rotate(-45deg);\n                transform: rotate(-45deg);\n        -webkit-transform-origin: 3.75em 3.75em;\n                transform-origin: 3.75em 3.75em;\n        border-radius: 7.5em 0 0 7.5em; }\n      .swal2-icon.swal2-success [class^='swal2-success-circular-line'][class$='right'] {\n        top: -.6875em;\n        left: 1.875em;\n        -webkit-transform: rotate(-45deg);\n                transform: rotate(-45deg);\n        -webkit-transform-origin: 0 3.75em;\n                transform-origin: 0 3.75em;\n        border-radius: 0 7.5em 7.5em 0; }\n    .swal2-icon.swal2-success .swal2-success-ring {\n      position: absolute;\n      top: -.25em;\n      left: -.25em;\n      width: 100%;\n      height: 100%;\n      border: 0.25em solid rgba(165, 220, 134, 0.3);\n      border-radius: 50%;\n      z-index: 2;\n      box-sizing: content-box; }\n    .swal2-icon.swal2-success .swal2-success-fix {\n      position: absolute;\n      top: .5em;\n      left: 1.625em;\n      width: .4375em;\n      height: 5.625em;\n      -webkit-transform: rotate(-45deg);\n              transform: rotate(-45deg);\n      z-index: 1; }\n    .swal2-icon.swal2-success [class^='swal2-success-line'] {\n      display: block;\n      position: absolute;\n      height: .3125em;\n      border-radius: .125em;\n      background-color: #a5dc86;\n      z-index: 2; }\n      .swal2-icon.swal2-success [class^='swal2-success-line'][class$='tip'] {\n        top: 2.875em;\n        left: .875em;\n        width: 1.5625em;\n        -webkit-transform: rotate(45deg);\n                transform: rotate(45deg); }\n      .swal2-icon.swal2-success [class^='swal2-success-line'][class$='long'] {\n        top: 2.375em;\n        right: .5em;\n        width: 2.9375em;\n        -webkit-transform: rotate(-45deg);\n                transform: rotate(-45deg); }\n\n.swal2-progresssteps {\n  align-items: center;\n  margin: 0 0 1.25em;\n  padding: 0;\n  font-weight: 600; }\n  .swal2-progresssteps li {\n    display: inline-block;\n    position: relative; }\n  .swal2-progresssteps .swal2-progresscircle {\n    width: 2em;\n    height: 2em;\n    border-radius: 2em;\n    background: #3085d6;\n    color: #fff;\n    line-height: 2em;\n    text-align: center;\n    z-index: 20; }\n    .swal2-progresssteps .swal2-progresscircle:first-child {\n      margin-left: 0; }\n    .swal2-progresssteps .swal2-progresscircle:last-child {\n      margin-right: 0; }\n    .swal2-progresssteps .swal2-progresscircle.swal2-activeprogressstep {\n      background: #3085d6; }\n      .swal2-progresssteps .swal2-progresscircle.swal2-activeprogressstep ~ .swal2-progresscircle {\n        background: #add8e6; }\n      .swal2-progresssteps .swal2-progresscircle.swal2-activeprogressstep ~ .swal2-progressline {\n        background: #add8e6; }\n  .swal2-progresssteps .swal2-progressline {\n    width: 2.5em;\n    height: .4em;\n    margin: 0 -1px;\n    background: #3085d6;\n    z-index: 10; }\n\n[class^='swal2'] {\n  -webkit-tap-highlight-color: transparent; }\n\n.swal2-show {\n  -webkit-animation: swal2-show 0.3s;\n          animation: swal2-show 0.3s; }\n  .swal2-show.swal2-noanimation {\n    -webkit-animation: none;\n            animation: none; }\n\n.swal2-hide {\n  -webkit-animation: swal2-hide 0.15s forwards;\n          animation: swal2-hide 0.15s forwards; }\n  .swal2-hide.swal2-noanimation {\n    -webkit-animation: none;\n            animation: none; }\n\n[dir='rtl'] .swal2-close {\n  right: auto;\n  left: 0; }\n\n.swal2-animate-success-icon .swal2-success-line-tip {\n  -webkit-animation: swal2-animate-success-line-tip 0.75s;\n          animation: swal2-animate-success-line-tip 0.75s; }\n\n.swal2-animate-success-icon .swal2-success-line-long {\n  -webkit-animation: swal2-animate-success-line-long 0.75s;\n          animation: swal2-animate-success-line-long 0.75s; }\n\n.swal2-animate-success-icon .swal2-success-circular-line-right {\n  -webkit-animation: swal2-rotate-success-circular-line 4.25s ease-in;\n          animation: swal2-rotate-success-circular-line 4.25s ease-in; }\n\n.swal2-animate-error-icon {\n  -webkit-animation: swal2-animate-error-icon 0.5s;\n          animation: swal2-animate-error-icon 0.5s; }\n  .swal2-animate-error-icon .swal2-x-mark {\n    -webkit-animation: swal2-animate-error-x-mark 0.5s;\n            animation: swal2-animate-error-x-mark 0.5s; }\n\n@-webkit-keyframes swal2-rotate-loading {\n  0% {\n    -webkit-transform: rotate(0deg);\n            transform: rotate(0deg); }\n  100% {\n    -webkit-transform: rotate(360deg);\n            transform: rotate(360deg); } }\n\n@keyframes swal2-rotate-loading {\n  0% {\n    -webkit-transform: rotate(0deg);\n            transform: rotate(0deg); }\n  100% {\n    -webkit-transform: rotate(360deg);\n            transform: rotate(360deg); } }")
-},{}]},{},[1]);
+(function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+'use strict';
+
+var _sweetalert = require('sweetalert2');
+
+var _sweetalert2 = _interopRequireDefault(_sweetalert);
+
+var _idb = require('idb');
+
+var _idb2 = _interopRequireDefault(_idb);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// A library for customizing browser alerts
+var dbPromise = void 0;
+
+window.addEventListener('load', function () {
+  // populate the `select` elements
+  var selectElements = document.getElementsByTagName('select');
+  // Fetch all the currencies from currencyconverterapi
+  fetch('https://free.currencyconverterapi.com/api/v5/currencies').then(function (currennciesResp) {
+    return currennciesResp.json();
+  }).then(function (currencies) {
+    var currencyName = void 0;
+    var currencyCode = void 0;
+    var option = void 0; // `option` node to hold new currencies' options being added
+    for (var currency in currencies.results) {
+      currencyName = currencies.results[currency].currencyName;
+      currencyCode = currencies.results[currency].id;
+      option = document.createElement('option');
+      option.innerText = currencyCode + ' | ' + currencyName;
+      option.id = currencyCode;
+      // You can't append a node in two points of the document
+      // .cloneNode() makes a copy of the node
+      // with an option of `true` to clone the node's content as well
+      selectElements[0].appendChild(option.cloneNode(true));
+      selectElements[1].appendChild(option);
+    }
+  });
+  // Register Service Worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js', { scope: './' }).then(function (reg) {
+      return console.log('Registration successful');
+    }).catch(function () {
+      return console.log('Registration failed');
+    });
+  }
+  // open an idb
+  dbPromise = _idb2.default.open('currenciesDB', 1, function (upgradeDB) {
+    upgradeDB.createObjectStore('rates', { keyPath: 'id' });
+  });
+});
+
+var convertBtn = document.getElementById('js_convertBtn');
+var inputAmount = document.getElementById('js_inputAmount');
+var resultingAmount = document.getElementById('js_resultingAmount');
+var srcSelect = document.getElementsByTagName('select')[0];
+var destSelect = document.getElementsByTagName('select')[1];
+
+convertBtn.addEventListener('click', function () {
+  var src_selected_opt = srcSelect.options[srcSelect.selectedIndex];
+  var dest_selected_opt = destSelect.options[destSelect.selectedIndex];
+  var src_currency = src_selected_opt.id;
+  var dest_currency = dest_selected_opt.id;
+
+  var fetchRate = function fetchRate(isRateFound) {
+    return fetch('https://free.currencyconverterapi.com/api/v5/convert?q=' + src_currency + '_' + dest_currency + '&compact=ultra').then(function (rateResp) {
+      return rateResp.json();
+    }).then(function (rate) {
+      var rate_value = rate[src_currency + '_' + dest_currency];
+      // convert using the fetched rate
+      //resultingAmount.textContent = `${dest_currency} ${(rate_value * inputAmount.value).toFixed(2)}`;
+      // Add the fetched rate to IndexedDB
+      dbPromise.then(function (db) {
+        var tx = db.transaction('rates', 'readwrite');
+        var ratesStore = tx.objectStore('rates');
+
+        // add it if it doesn't exist, or update it if it already exists
+        ratesStore.put({
+          rate: rate_value,
+          id: src_currency + '_' + dest_currency
+        });
+        return tx.complete;
+      });
+      return rate_value;
+    }).catch(function () {
+      if (!isRateFound)
+        // if rateStored is true do nothing
+        // (because the resulting amount was already shown to the user)
+        // otherwise show alert (that says, you're offline, and that rate isn't stored)
+        (0, _sweetalert2.default)({
+          type: 'error',
+          title: 'Oops...',
+          text: 'I cannot convert this while offline'
+        });
+    });
+  };
+
+  if (inputAmount.value === '') {
+    // show an alert message if amount field is empty
+    (0, _sweetalert2.default)({
+      type: 'error',
+      title: 'Oops...',
+      text: 'This field cannot be empty'
+    });
+    return;
+  }
+  // look for the rate in IDB, if it's not there, fetch it and add it to IDB
+  // ALSO update the rates if they've changed
+  dbPromise.then(function (db) {
+    var ratesStore = db.transaction('rates').objectStore('rates');
+    var storedRate = void 0;
+    ratesStore.openCursor().then(function cursorIterate(cursor) {
+      if (!cursor) return;
+      storedRate = cursor.value;
+      // Once we find the wanted rate, the cursor stops iterating
+      return cursor.value.id === src_currency + '_' + dest_currency || cursor.continue().then(cursorIterate);
+    }).then(function (isRateFound) {
+      // returns undefined if not found, and returns the storedRate if found
+
+      if (isRateFound && storedRate)
+        // rate already stored
+        resultingAmount.textContent = dest_currency + ' ' + (storedRate.rate * inputAmount.value).toFixed(2);else
+        /*
+        rate not found in IDB
+        if the client is online the rate will be fetched and added to idb
+        if offline the client will be shown an alert
+        */
+        return fetchRate(isRateFound).then(function (fetchedRate) {
+          return resultingAmount.textContent = dest_currency + ' ' + (fetchedRate * inputAmount.value).toFixed(2);
+        });
+    });
+  });
+
+  inputAmount.focus();
+});
+
+},{"idb":2,"sweetalert2":3}],2:[function(require,module,exports){
+'use strict';
+
+(function() {
+  function toArray(arr) {
+    return Array.prototype.slice.call(arr);
+  }
+
+  function promisifyRequest(request) {
+    return new Promise(function(resolve, reject) {
+      request.onsuccess = function() {
+        resolve(request.result);
+      };
+
+      request.onerror = function() {
+        reject(request.error);
+      };
+    });
+  }
+
+  function promisifyRequestCall(obj, method, args) {
+    var request;
+    var p = new Promise(function(resolve, reject) {
+      request = obj[method].apply(obj, args);
+      promisifyRequest(request).then(resolve, reject);
+    });
+
+    p.request = request;
+    return p;
+  }
+
+  function promisifyCursorRequestCall(obj, method, args) {
+    var p = promisifyRequestCall(obj, method, args);
+    return p.then(function(value) {
+      if (!value) return;
+      return new Cursor(value, p.request);
+    });
+  }
+
+  function proxyProperties(ProxyClass, targetProp, properties) {
+    properties.forEach(function(prop) {
+      Object.defineProperty(ProxyClass.prototype, prop, {
+        get: function() {
+          return this[targetProp][prop];
+        },
+        set: function(val) {
+          this[targetProp][prop] = val;
+        }
+      });
+    });
+  }
+
+  function proxyRequestMethods(ProxyClass, targetProp, Constructor, properties) {
+    properties.forEach(function(prop) {
+      if (!(prop in Constructor.prototype)) return;
+      ProxyClass.prototype[prop] = function() {
+        return promisifyRequestCall(this[targetProp], prop, arguments);
+      };
+    });
+  }
+
+  function proxyMethods(ProxyClass, targetProp, Constructor, properties) {
+    properties.forEach(function(prop) {
+      if (!(prop in Constructor.prototype)) return;
+      ProxyClass.prototype[prop] = function() {
+        return this[targetProp][prop].apply(this[targetProp], arguments);
+      };
+    });
+  }
+
+  function proxyCursorRequestMethods(ProxyClass, targetProp, Constructor, properties) {
+    properties.forEach(function(prop) {
+      if (!(prop in Constructor.prototype)) return;
+      ProxyClass.prototype[prop] = function() {
+        return promisifyCursorRequestCall(this[targetProp], prop, arguments);
+      };
+    });
+  }
+
+  function Index(index) {
+    this._index = index;
+  }
+
+  proxyProperties(Index, '_index', [
+    'name',
+    'keyPath',
+    'multiEntry',
+    'unique'
+  ]);
+
+  proxyRequestMethods(Index, '_index', IDBIndex, [
+    'get',
+    'getKey',
+    'getAll',
+    'getAllKeys',
+    'count'
+  ]);
+
+  proxyCursorRequestMethods(Index, '_index', IDBIndex, [
+    'openCursor',
+    'openKeyCursor'
+  ]);
+
+  function Cursor(cursor, request) {
+    this._cursor = cursor;
+    this._request = request;
+  }
+
+  proxyProperties(Cursor, '_cursor', [
+    'direction',
+    'key',
+    'primaryKey',
+    'value'
+  ]);
+
+  proxyRequestMethods(Cursor, '_cursor', IDBCursor, [
+    'update',
+    'delete'
+  ]);
+
+  // proxy 'next' methods
+  ['advance', 'continue', 'continuePrimaryKey'].forEach(function(methodName) {
+    if (!(methodName in IDBCursor.prototype)) return;
+    Cursor.prototype[methodName] = function() {
+      var cursor = this;
+      var args = arguments;
+      return Promise.resolve().then(function() {
+        cursor._cursor[methodName].apply(cursor._cursor, args);
+        return promisifyRequest(cursor._request).then(function(value) {
+          if (!value) return;
+          return new Cursor(value, cursor._request);
+        });
+      });
+    };
+  });
+
+  function ObjectStore(store) {
+    this._store = store;
+  }
+
+  ObjectStore.prototype.createIndex = function() {
+    return new Index(this._store.createIndex.apply(this._store, arguments));
+  };
+
+  ObjectStore.prototype.index = function() {
+    return new Index(this._store.index.apply(this._store, arguments));
+  };
+
+  proxyProperties(ObjectStore, '_store', [
+    'name',
+    'keyPath',
+    'indexNames',
+    'autoIncrement'
+  ]);
+
+  proxyRequestMethods(ObjectStore, '_store', IDBObjectStore, [
+    'put',
+    'add',
+    'delete',
+    'clear',
+    'get',
+    'getAll',
+    'getKey',
+    'getAllKeys',
+    'count'
+  ]);
+
+  proxyCursorRequestMethods(ObjectStore, '_store', IDBObjectStore, [
+    'openCursor',
+    'openKeyCursor'
+  ]);
+
+  proxyMethods(ObjectStore, '_store', IDBObjectStore, [
+    'deleteIndex'
+  ]);
+
+  function Transaction(idbTransaction) {
+    this._tx = idbTransaction;
+    this.complete = new Promise(function(resolve, reject) {
+      idbTransaction.oncomplete = function() {
+        resolve();
+      };
+      idbTransaction.onerror = function() {
+        reject(idbTransaction.error);
+      };
+      idbTransaction.onabort = function() {
+        reject(idbTransaction.error);
+      };
+    });
+  }
+
+  Transaction.prototype.objectStore = function() {
+    return new ObjectStore(this._tx.objectStore.apply(this._tx, arguments));
+  };
+
+  proxyProperties(Transaction, '_tx', [
+    'objectStoreNames',
+    'mode'
+  ]);
+
+  proxyMethods(Transaction, '_tx', IDBTransaction, [
+    'abort'
+  ]);
+
+  function UpgradeDB(db, oldVersion, transaction) {
+    this._db = db;
+    this.oldVersion = oldVersion;
+    this.transaction = new Transaction(transaction);
+  }
+
+  UpgradeDB.prototype.createObjectStore = function() {
+    return new ObjectStore(this._db.createObjectStore.apply(this._db, arguments));
+  };
+
+  proxyProperties(UpgradeDB, '_db', [
+    'name',
+    'version',
+    'objectStoreNames'
+  ]);
+
+  proxyMethods(UpgradeDB, '_db', IDBDatabase, [
+    'deleteObjectStore',
+    'close'
+  ]);
+
+  function DB(db) {
+    this._db = db;
+  }
+
+  DB.prototype.transaction = function() {
+    return new Transaction(this._db.transaction.apply(this._db, arguments));
+  };
+
+  proxyProperties(DB, '_db', [
+    'name',
+    'version',
+    'objectStoreNames'
+  ]);
+
+  proxyMethods(DB, '_db', IDBDatabase, [
+    'close'
+  ]);
+
+  // Add cursor iterators
+  // TODO: remove this once browsers do the right thing with promises
+  ['openCursor', 'openKeyCursor'].forEach(function(funcName) {
+    [ObjectStore, Index].forEach(function(Constructor) {
+      // Don't create iterateKeyCursor if openKeyCursor doesn't exist.
+      if (!(funcName in Constructor.prototype)) return;
+
+      Constructor.prototype[funcName.replace('open', 'iterate')] = function() {
+        var args = toArray(arguments);
+        var callback = args[args.length - 1];
+        var nativeObject = this._store || this._index;
+        var request = nativeObject[funcName].apply(nativeObject, args.slice(0, -1));
+        request.onsuccess = function() {
+          callback(request.result);
+        };
+      };
+    });
+  });
+
+  // polyfill getAll
+  [Index, ObjectStore].forEach(function(Constructor) {
+    if (Constructor.prototype.getAll) return;
+    Constructor.prototype.getAll = function(query, count) {
+      var instance = this;
+      var items = [];
+
+      return new Promise(function(resolve) {
+        instance.iterateCursor(query, function(cursor) {
+          if (!cursor) {
+            resolve(items);
+            return;
+          }
+          items.push(cursor.value);
+
+          if (count !== undefined && items.length == count) {
+            resolve(items);
+            return;
+          }
+          cursor.continue();
+        });
+      });
+    };
+  });
+
+  var exp = {
+    open: function(name, version, upgradeCallback) {
+      var p = promisifyRequestCall(indexedDB, 'open', [name, version]);
+      var request = p.request;
+
+      if (request) {
+        request.onupgradeneeded = function(event) {
+          if (upgradeCallback) {
+            upgradeCallback(new UpgradeDB(request.result, event.oldVersion, request.transaction));
+          }
+        };
+      }
+
+      return p.then(function(db) {
+        return new DB(db);
+      });
+    },
+    delete: function(name) {
+      return promisifyRequestCall(indexedDB, 'deleteDatabase', [name]);
+    }
+  };
+
+  if (typeof module !== 'undefined') {
+    module.exports = exp;
+    module.exports.default = module.exports;
+  }
+  else {
+    self.idb = exp;
+  }
+}());
+
+},{}],3:[function(require,module,exports){
+/*!
+* sweetalert2 v7.24.2
+* Released under the MIT License.
+*/
+(function (global, factory) {
+	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+	typeof define === 'function' && define.amd ? define(factory) :
+	(global.Sweetalert2 = factory());
+}(this, (function () { 'use strict';
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
+  return typeof obj;
+} : function (obj) {
+  return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+};
+
+
+
+
+
+
+
+
+
+
+
+var classCallCheck = function (instance, Constructor) {
+  if (!(instance instanceof Constructor)) {
+    throw new TypeError("Cannot call a class as a function");
+  }
+};
+
+var createClass = function () {
+  function defineProperties(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor) descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+
+  return function (Constructor, protoProps, staticProps) {
+    if (protoProps) defineProperties(Constructor.prototype, protoProps);
+    if (staticProps) defineProperties(Constructor, staticProps);
+    return Constructor;
+  };
+}();
+
+
+
+
+
+
+
+var _extends = Object.assign || function (target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = arguments[i];
+
+    for (var key in source) {
+      if (Object.prototype.hasOwnProperty.call(source, key)) {
+        target[key] = source[key];
+      }
+    }
+  }
+
+  return target;
+};
+
+var get = function get(object, property, receiver) {
+  if (object === null) object = Function.prototype;
+  var desc = Object.getOwnPropertyDescriptor(object, property);
+
+  if (desc === undefined) {
+    var parent = Object.getPrototypeOf(object);
+
+    if (parent === null) {
+      return undefined;
+    } else {
+      return get(parent, property, receiver);
+    }
+  } else if ("value" in desc) {
+    return desc.value;
+  } else {
+    var getter = desc.get;
+
+    if (getter === undefined) {
+      return undefined;
+    }
+
+    return getter.call(receiver);
+  }
+};
+
+var inherits = function (subClass, superClass) {
+  if (typeof superClass !== "function" && superClass !== null) {
+    throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
+  }
+
+  subClass.prototype = Object.create(superClass && superClass.prototype, {
+    constructor: {
+      value: subClass,
+      enumerable: false,
+      writable: true,
+      configurable: true
+    }
+  });
+  if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
+};
+
+
+
+
+
+
+
+
+
+
+
+var possibleConstructorReturn = function (self, call) {
+  if (!self) {
+    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+  }
+
+  return call && (typeof call === "object" || typeof call === "function") ? call : self;
+};
+
+
+
+
+
+var slicedToArray = function () {
+  function sliceIterator(arr, i) {
+    var _arr = [];
+    var _n = true;
+    var _d = false;
+    var _e = undefined;
+
+    try {
+      for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+        _arr.push(_s.value);
+
+        if (i && _arr.length === i) break;
+      }
+    } catch (err) {
+      _d = true;
+      _e = err;
+    } finally {
+      try {
+        if (!_n && _i["return"]) _i["return"]();
+      } finally {
+        if (_d) throw _e;
+      }
+    }
+
+    return _arr;
+  }
+
+  return function (arr, i) {
+    if (Array.isArray(arr)) {
+      return arr;
+    } else if (Symbol.iterator in Object(arr)) {
+      return sliceIterator(arr, i);
+    } else {
+      throw new TypeError("Invalid attempt to destructure non-iterable instance");
+    }
+  };
+}();
+
+var consolePrefix = 'SweetAlert2:';
+
+/**
+ * Filter the unique values into a new array
+ * @param arr
+ */
+var uniqueArray = function uniqueArray(arr) {
+  var result = [];
+  for (var i = 0; i < arr.length; i++) {
+    if (result.indexOf(arr[i]) === -1) {
+      result.push(arr[i]);
+    }
+  }
+  return result;
+};
+
+/**
+ * Converts `inputOptions` into an array of `[value, label]`s
+ * @param inputOptions
+ */
+var formatInputOptions = function formatInputOptions(inputOptions) {
+  var result = [];
+  if (typeof Map !== 'undefined' && inputOptions instanceof Map) {
+    inputOptions.forEach(function (value, key) {
+      result.push([key, value]);
+    });
+  } else {
+    Object.keys(inputOptions).forEach(function (key) {
+      result.push([key, inputOptions[key]]);
+    });
+  }
+  return result;
+};
+
+/**
+ * Standardise console warnings
+ * @param message
+ */
+var warn = function warn(message) {
+  console.warn(consolePrefix + ' ' + message);
+};
+
+/**
+ * Standardise console errors
+ * @param message
+ */
+var error = function error(message) {
+  console.error(consolePrefix + ' ' + message);
+};
+
+/**
+ * Private global state for `warnOnce`
+ * @type {Array}
+ * @private
+ */
+var previousWarnOnceMessages = [];
+
+/**
+ * Show a console warning, but only if it hasn't already been shown
+ * @param message
+ */
+var warnOnce = function warnOnce(message) {
+  if (!(previousWarnOnceMessages.indexOf(message) !== -1)) {
+    previousWarnOnceMessages.push(message);
+    warn(message);
+  }
+};
+
+/**
+ * If `arg` is a function, call it (with no arguments or context) and return the result.
+ * Otherwise, just pass the value through
+ * @param arg
+ */
+var callIfFunction = function callIfFunction(arg) {
+  return typeof arg === 'function' ? arg() : arg;
+};
+
+var isThenable = function isThenable(arg) {
+  return (typeof arg === 'undefined' ? 'undefined' : _typeof(arg)) === 'object' && typeof arg.then === 'function';
+};
+
+var DismissReason = Object.freeze({
+  cancel: 'cancel',
+  backdrop: 'overlay',
+  close: 'close',
+  esc: 'esc',
+  timer: 'timer'
+});
+
+var version = "7.24.2";
+
+var argsToParams = function argsToParams(args) {
+  var params = {};
+  switch (_typeof(args[0])) {
+    case 'string':
+      ['title', 'html', 'type'].forEach(function (name, index) {
+        switch (_typeof(args[index])) {
+          case 'string':
+            params[name] = args[index];
+            break;
+          case 'undefined':
+            break;
+          default:
+            error('Unexpected type of ' + name + '! Expected "string", got ' + _typeof(args[index]));
+        }
+      });
+      break;
+
+    case 'object':
+      _extends(params, args[0]);
+      break;
+
+    default:
+      error('Unexpected type of argument! Expected "string" or "object", got ' + _typeof(args[0]));
+      return false;
+  }
+  return params;
+};
+
+/**
+ * Adapt a legacy inputValidator for use with expectRejections=false
+ */
+var adaptInputValidator = function adaptInputValidator(legacyValidator) {
+  return function adaptedInputValidator(inputValue, extraParams) {
+    return legacyValidator.call(this, inputValue, extraParams).then(function () {
+      return undefined;
+    }, function (validationError) {
+      return validationError;
+    });
+  };
+};
+
+var swalPrefix = 'swal2-';
+
+var prefix = function prefix(items) {
+  var result = {};
+  for (var i in items) {
+    result[items[i]] = swalPrefix + items[i];
+  }
+  return result;
+};
+
+var swalClasses = prefix(['container', 'shown', 'height-auto', 'iosfix', 'popup', 'modal', 'no-backdrop', 'toast', 'toast-shown', 'fade', 'show', 'hide', 'noanimation', 'close', 'title', 'header', 'content', 'actions', 'confirm', 'cancel', 'footer', 'icon', 'icon-text', 'image', 'input', 'has-input', 'file', 'range', 'select', 'radio', 'checkbox', 'textarea', 'inputerror', 'validationerror', 'progresssteps', 'activeprogressstep', 'progresscircle', 'progressline', 'loading', 'styled', 'top', 'top-start', 'top-end', 'top-left', 'top-right', 'center', 'center-start', 'center-end', 'center-left', 'center-right', 'bottom', 'bottom-start', 'bottom-end', 'bottom-left', 'bottom-right', 'grow-row', 'grow-column', 'grow-fullscreen']);
+
+var iconTypes = prefix(['success', 'warning', 'info', 'question', 'error']);
+
+// Remember state in cases where opening and handling a modal will fiddle with it.
+var states = {
+  previousBodyPadding: null
+};
+
+var hasClass = function hasClass(elem, className) {
+  if (elem.classList) {
+    return elem.classList.contains(className);
+  }
+  return false;
+};
+
+var focusInput = function focusInput(input) {
+  input.focus();
+
+  // place cursor at end of text in text input
+  if (input.type !== 'file') {
+    // http://stackoverflow.com/a/2345915/1331425
+    var val = input.value;
+    input.value = '';
+    input.value = val;
+  }
+};
+
+var addOrRemoveClass = function addOrRemoveClass(target, classList, add) {
+  if (!target || !classList) {
+    return;
+  }
+  if (typeof classList === 'string') {
+    classList = classList.split(/\s+/).filter(Boolean);
+  }
+  classList.forEach(function (className) {
+    if (target.forEach) {
+      target.forEach(function (elem) {
+        add ? elem.classList.add(className) : elem.classList.remove(className);
+      });
+    } else {
+      add ? target.classList.add(className) : target.classList.remove(className);
+    }
+  });
+};
+
+var addClass = function addClass(target, classList) {
+  addOrRemoveClass(target, classList, true);
+};
+
+var removeClass = function removeClass(target, classList) {
+  addOrRemoveClass(target, classList, false);
+};
+
+var getChildByClass = function getChildByClass(elem, className) {
+  for (var i = 0; i < elem.childNodes.length; i++) {
+    if (hasClass(elem.childNodes[i], className)) {
+      return elem.childNodes[i];
+    }
+  }
+};
+
+var show = function show(elem) {
+  elem.style.opacity = '';
+  elem.style.display = elem.id === swalClasses.content ? 'block' : 'flex';
+};
+
+var hide = function hide(elem) {
+  elem.style.opacity = '';
+  elem.style.display = 'none';
+};
+
+var empty = function empty(elem) {
+  while (elem.firstChild) {
+    elem.removeChild(elem.firstChild);
+  }
+};
+
+// borrowed from jquery $(elem).is(':visible') implementation
+var isVisible = function isVisible(elem) {
+  return elem && (elem.offsetWidth || elem.offsetHeight || elem.getClientRects().length);
+};
+
+var removeStyleProperty = function removeStyleProperty(elem, property) {
+  if (elem.style.removeProperty) {
+    elem.style.removeProperty(property);
+  } else {
+    elem.style.removeAttribute(property);
+  }
+};
+
+var getContainer = function getContainer() {
+  return document.body.querySelector('.' + swalClasses.container);
+};
+
+var elementByClass = function elementByClass(className) {
+  var container = getContainer();
+  return container ? container.querySelector('.' + className) : null;
+};
+
+var getPopup = function getPopup() {
+  return elementByClass(swalClasses.popup);
+};
+
+var getIcons = function getIcons() {
+  var popup = getPopup();
+  return popup.querySelectorAll('.' + swalClasses.icon);
+};
+
+var getTitle = function getTitle() {
+  return elementByClass(swalClasses.title);
+};
+
+var getContent = function getContent() {
+  return elementByClass(swalClasses.content);
+};
+
+var getImage = function getImage() {
+  return elementByClass(swalClasses.image);
+};
+
+var getProgressSteps = function getProgressSteps() {
+  return elementByClass(swalClasses.progresssteps);
+};
+
+var getValidationError = function getValidationError() {
+  return elementByClass(swalClasses.validationerror);
+};
+
+var getConfirmButton = function getConfirmButton() {
+  return elementByClass(swalClasses.confirm);
+};
+
+var getCancelButton = function getCancelButton() {
+  return elementByClass(swalClasses.cancel);
+};
+
+var getButtonsWrapper = function getButtonsWrapper() {
+  warnOnce('swal.getButtonsWrapper() is deprecated and will be removed in the next major release, use swal.getActions() instead');
+  return elementByClass(swalClasses.actions);
+};
+
+var getActions = function getActions() {
+  return elementByClass(swalClasses.actions);
+};
+
+var getFooter = function getFooter() {
+  return elementByClass(swalClasses.footer);
+};
+
+var getCloseButton = function getCloseButton() {
+  return elementByClass(swalClasses.close);
+};
+
+var getFocusableElements = function getFocusableElements() {
+  var focusableElementsWithTabindex = Array.prototype.slice.call(getPopup().querySelectorAll('[tabindex]:not([tabindex="-1"]):not([tabindex="0"])'))
+  // sort according to tabindex
+  .sort(function (a, b) {
+    a = parseInt(a.getAttribute('tabindex'));
+    b = parseInt(b.getAttribute('tabindex'));
+    if (a > b) {
+      return 1;
+    } else if (a < b) {
+      return -1;
+    }
+    return 0;
+  });
+
+  // https://github.com/jkup/focusable/blob/master/index.js
+  var otherFocusableElements = Array.prototype.slice.call(getPopup().querySelectorAll('a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, [tabindex="0"], [contenteditable], audio[controls], video[controls]'));
+
+  return uniqueArray(focusableElementsWithTabindex.concat(otherFocusableElements));
+};
+
+var isModal = function isModal() {
+  return !document.body.classList.contains(swalClasses['toast-shown']);
+};
+
+var isToast = function isToast() {
+  return document.body.classList.contains(swalClasses['toast-shown']);
+};
+
+var isLoading = function isLoading() {
+  return getPopup().hasAttribute('data-loading');
+};
+
+// Detect Node env
+var isNodeEnv = function isNodeEnv() {
+  return typeof window === 'undefined' || typeof document === 'undefined';
+};
+
+var sweetHTML = ('\n <div aria-labelledby="' + swalClasses.title + '" aria-describedby="' + swalClasses.content + '" class="' + swalClasses.popup + '" tabindex="-1">\n   <div class="' + swalClasses.header + '">\n     <ul class="' + swalClasses.progresssteps + '"></ul>\n     <div class="' + swalClasses.icon + ' ' + iconTypes.error + '">\n       <span class="swal2-x-mark"><span class="swal2-x-mark-line-left"></span><span class="swal2-x-mark-line-right"></span></span>\n     </div>\n     <div class="' + swalClasses.icon + ' ' + iconTypes.question + '">\n       <span class="' + swalClasses['icon-text'] + '">?</span>\n      </div>\n     <div class="' + swalClasses.icon + ' ' + iconTypes.warning + '">\n       <span class="' + swalClasses['icon-text'] + '">!</span>\n      </div>\n     <div class="' + swalClasses.icon + ' ' + iconTypes.info + '">\n       <span class="' + swalClasses['icon-text'] + '">i</span>\n      </div>\n     <div class="' + swalClasses.icon + ' ' + iconTypes.success + '">\n       <div class="swal2-success-circular-line-left"></div>\n       <span class="swal2-success-line-tip"></span> <span class="swal2-success-line-long"></span>\n       <div class="swal2-success-ring"></div> <div class="swal2-success-fix"></div>\n       <div class="swal2-success-circular-line-right"></div>\n     </div>\n     <img class="' + swalClasses.image + '" />\n     <h2 class="' + swalClasses.title + '" id="' + swalClasses.title + '"></h2>\n     <button type="button" class="' + swalClasses.close + '">\xD7</button>\n   </div>\n   <div class="' + swalClasses.content + '">\n     <div id="' + swalClasses.content + '"></div>\n     <input class="' + swalClasses.input + '" />\n     <input type="file" class="' + swalClasses.file + '" />\n     <div class="' + swalClasses.range + '">\n       <input type="range" />\n       <output></output>\n     </div>\n     <select class="' + swalClasses.select + '"></select>\n     <div class="' + swalClasses.radio + '"></div>\n     <label for="' + swalClasses.checkbox + '" class="' + swalClasses.checkbox + '">\n       <input type="checkbox" />\n     </label>\n     <textarea class="' + swalClasses.textarea + '"></textarea>\n     <div class="' + swalClasses.validationerror + '" id="' + swalClasses.validationerror + '"></div>\n   </div>\n   <div class="' + swalClasses.actions + '">\n     <button type="button" class="' + swalClasses.confirm + '">OK</button>\n     <button type="button" class="' + swalClasses.cancel + '">Cancel</button>\n   </div>\n   <div class="' + swalClasses.footer + '">\n   </div>\n </div>\n').replace(/(^|\n)\s*/g, '');
+
+/*
+ * Add modal + backdrop to DOM
+ */
+var init = function init(params) {
+  // Clean up the old popup if it exists
+  var c = getContainer();
+  if (c) {
+    c.parentNode.removeChild(c);
+    removeClass([document.documentElement, document.body], [swalClasses['no-backdrop'], swalClasses['has-input'], swalClasses['toast-shown']]);
+  }
+
+  if (isNodeEnv()) {
+    error('SweetAlert2 requires document to initialize');
+    return;
+  }
+
+  var container = document.createElement('div');
+  container.className = swalClasses.container;
+  container.innerHTML = sweetHTML;
+
+  var targetElement = typeof params.target === 'string' ? document.querySelector(params.target) : params.target;
+  targetElement.appendChild(container);
+
+  var popup = getPopup();
+  var content = getContent();
+  var input = getChildByClass(content, swalClasses.input);
+  var file = getChildByClass(content, swalClasses.file);
+  var range = content.querySelector('.' + swalClasses.range + ' input');
+  var rangeOutput = content.querySelector('.' + swalClasses.range + ' output');
+  var select = getChildByClass(content, swalClasses.select);
+  var checkbox = content.querySelector('.' + swalClasses.checkbox + ' input');
+  var textarea = getChildByClass(content, swalClasses.textarea);
+
+  // a11y
+  popup.setAttribute('role', params.toast ? 'alert' : 'dialog');
+  popup.setAttribute('aria-live', params.toast ? 'polite' : 'assertive');
+  if (!params.toast) {
+    popup.setAttribute('aria-modal', 'true');
+  }
+
+  var oldInputVal = void 0; // IE11 workaround, see #1109 for details
+  var resetValidationError = function resetValidationError(e) {
+    if (Swal.isVisible() && oldInputVal !== e.target.value) {
+      Swal.resetValidationError();
+    }
+    oldInputVal = e.target.value;
+  };
+
+  input.oninput = resetValidationError;
+  file.onchange = resetValidationError;
+  select.onchange = resetValidationError;
+  checkbox.onchange = resetValidationError;
+  textarea.oninput = resetValidationError;
+
+  range.oninput = function (e) {
+    resetValidationError(e);
+    rangeOutput.value = range.value;
+  };
+
+  range.onchange = function (e) {
+    resetValidationError(e);
+    range.nextSibling.value = range.value;
+  };
+
+  return popup;
+};
+
+var parseHtmlToContainer = function parseHtmlToContainer(param, target) {
+  if (!param) {
+    return hide(target);
+  }
+
+  if ((typeof param === 'undefined' ? 'undefined' : _typeof(param)) === 'object') {
+    target.innerHTML = '';
+    if (0 in param) {
+      for (var i = 0; i in param; i++) {
+        target.appendChild(param[i].cloneNode(true));
+      }
+    } else {
+      target.appendChild(param.cloneNode(true));
+    }
+  } else if (param) {
+    target.innerHTML = param;
+  } else {}
+  show(target);
+};
+
+var animationEndEvent = function () {
+  // Prevent run in Node env
+  if (isNodeEnv()) {
+    return false;
+  }
+
+  var testEl = document.createElement('div');
+  var transEndEventNames = {
+    'WebkitAnimation': 'webkitAnimationEnd',
+    'OAnimation': 'oAnimationEnd oanimationend',
+    'animation': 'animationend'
+  };
+  for (var i in transEndEventNames) {
+    if (transEndEventNames.hasOwnProperty(i) && typeof testEl.style[i] !== 'undefined') {
+      return transEndEventNames[i];
+    }
+  }
+
+  return false;
+}();
+
+// Measure width of scrollbar
+// https://github.com/twbs/bootstrap/blob/master/js/modal.js#L279-L286
+var measureScrollbar = function measureScrollbar() {
+  var supportsTouch = 'ontouchstart' in window || navigator.msMaxTouchPoints;
+  if (supportsTouch) {
+    return 0;
+  }
+  var scrollDiv = document.createElement('div');
+  scrollDiv.style.width = '50px';
+  scrollDiv.style.height = '50px';
+  scrollDiv.style.overflow = 'scroll';
+  document.body.appendChild(scrollDiv);
+  var scrollbarWidth = scrollDiv.offsetWidth - scrollDiv.clientWidth;
+  document.body.removeChild(scrollDiv);
+  return scrollbarWidth;
+};
+
+var fixScrollbar = function fixScrollbar() {
+  // for queues, do not do this more than once
+  if (states.previousBodyPadding !== null) {
+    return;
+  }
+  // if the body has overflow
+  if (document.body.scrollHeight > window.innerHeight) {
+    // add padding so the content doesn't shift after removal of scrollbar
+    states.previousBodyPadding = parseInt(window.getComputedStyle(document.body).getPropertyValue('padding-right'));
+    document.body.style.paddingRight = states.previousBodyPadding + measureScrollbar() + 'px';
+  }
+};
+
+var undoScrollbar = function undoScrollbar() {
+  if (states.previousBodyPadding !== null) {
+    document.body.style.paddingRight = states.previousBodyPadding;
+    states.previousBodyPadding = null;
+  }
+};
+
+// Fix iOS scrolling http://stackoverflow.com/q/39626302/1331425
+var iOSfix = function iOSfix() {
+  var iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  if (iOS && !hasClass(document.body, swalClasses.iosfix)) {
+    var offset = document.body.scrollTop;
+    document.body.style.top = offset * -1 + 'px';
+    addClass(document.body, swalClasses.iosfix);
+  }
+};
+
+var undoIOSfix = function undoIOSfix() {
+  if (hasClass(document.body, swalClasses.iosfix)) {
+    var offset = parseInt(document.body.style.top, 10);
+    removeClass(document.body, swalClasses.iosfix);
+    document.body.style.top = '';
+    document.body.scrollTop = offset * -1;
+  }
+};
+
+var globalState = {};
+
+// Restore previous active (focused) element
+var restoreActiveElement = function restoreActiveElement() {
+  var x = window.scrollX;
+  var y = window.scrollY;
+  globalState.restoreFocusTimeout = setTimeout(function () {
+    if (globalState.previousActiveElement && globalState.previousActiveElement.focus) {
+      globalState.previousActiveElement.focus();
+      globalState.previousActiveElement = null;
+    }
+  }, 100); // issues/900
+  if (typeof x !== 'undefined' && typeof y !== 'undefined') {
+    // IE doesn't have scrollX/scrollY support
+    window.scrollTo(x, y);
+  }
+};
+
+/*
+ * Global function to close sweetAlert
+ */
+var close = function close(onClose, onAfterClose) {
+  var container = getContainer();
+  var popup = getPopup();
+  if (!popup) {
+    return;
+  }
+
+  if (onClose !== null && typeof onClose === 'function') {
+    onClose(popup);
+  }
+
+  removeClass(popup, swalClasses.show);
+  addClass(popup, swalClasses.hide);
+
+  var removePopupAndResetState = function removePopupAndResetState() {
+    if (!isToast()) {
+      restoreActiveElement();
+      globalState.keydownTarget.removeEventListener('keydown', globalState.keydownHandler, { capture: globalState.keydownListenerCapture });
+      globalState.keydownHandlerAdded = false;
+    }
+
+    if (container.parentNode) {
+      container.parentNode.removeChild(container);
+    }
+    removeClass([document.documentElement, document.body], [swalClasses.shown, swalClasses['height-auto'], swalClasses['no-backdrop'], swalClasses['has-input'], swalClasses['toast-shown']]);
+
+    if (isModal()) {
+      undoScrollbar();
+      undoIOSfix();
+    }
+
+    if (onAfterClose !== null && typeof onAfterClose === 'function') {
+      setTimeout(function () {
+        onAfterClose();
+      });
+    }
+  };
+
+  // If animation is supported, animate
+  if (animationEndEvent && !hasClass(popup, swalClasses.noanimation)) {
+    popup.addEventListener(animationEndEvent, function swalCloseEventFinished() {
+      popup.removeEventListener(animationEndEvent, swalCloseEventFinished);
+      if (hasClass(popup, swalClasses.hide)) {
+        removePopupAndResetState();
+      }
+    });
+  } else {
+    // Otherwise, remove immediately
+    removePopupAndResetState();
+  }
+};
+
+/*
+ * Global function to determine if swal2 popup is shown
+ */
+var isVisible$1 = function isVisible() {
+  return !!getPopup();
+};
+
+/*
+ * Global function to click 'Confirm' button
+ */
+var clickConfirm = function clickConfirm() {
+  return getConfirmButton().click();
+};
+
+/*
+ * Global function to click 'Cancel' button
+ */
+var clickCancel = function clickCancel() {
+  return getCancelButton().click();
+};
+
+function fire() {
+  var Swal = this;
+
+  for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+    args[_key] = arguments[_key];
+  }
+
+  return new (Function.prototype.bind.apply(Swal, [null].concat(args)))();
+}
+
+/**
+ * Extends a Swal class making it able to be instantiated without the `new` keyword (and thus without `Swal.fire`)
+ * @param ParentSwal
+ * @returns {NoNewKeywordSwal}
+ */
+function withNoNewKeyword(ParentSwal) {
+  var NoNewKeywordSwal = function NoNewKeywordSwal() {
+    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    if (!(this instanceof NoNewKeywordSwal)) {
+      return new (Function.prototype.bind.apply(NoNewKeywordSwal, [null].concat(args)))();
+    }
+    Object.getPrototypeOf(NoNewKeywordSwal).apply(this, args);
+  };
+  NoNewKeywordSwal.prototype = _extends(Object.create(ParentSwal.prototype), { constructor: NoNewKeywordSwal });
+
+  if (typeof Object.setPrototypeOf === 'function') {
+    Object.setPrototypeOf(NoNewKeywordSwal, ParentSwal);
+  } else {
+    // Android 4.4
+    // eslint-disable-next-line
+    NoNewKeywordSwal.__proto__ = ParentSwal;
+  }
+  return NoNewKeywordSwal;
+}
+
+var defaultParams = {
+  title: '',
+  titleText: '',
+  text: '',
+  html: '',
+  footer: '',
+  type: null,
+  toast: false,
+  customClass: '',
+  target: 'body',
+  backdrop: true,
+  animation: true,
+  heightAuto: true,
+  allowOutsideClick: true,
+  allowEscapeKey: true,
+  allowEnterKey: true,
+  stopKeydownPropagation: true,
+  keydownListenerCapture: false,
+  showConfirmButton: true,
+  showCancelButton: false,
+  preConfirm: null,
+  confirmButtonText: 'OK',
+  confirmButtonAriaLabel: '',
+  confirmButtonColor: null,
+  confirmButtonClass: null,
+  cancelButtonText: 'Cancel',
+  cancelButtonAriaLabel: '',
+  cancelButtonColor: null,
+  cancelButtonClass: null,
+  buttonsStyling: true,
+  reverseButtons: false,
+  focusConfirm: true,
+  focusCancel: false,
+  showCloseButton: false,
+  closeButtonAriaLabel: 'Close this dialog',
+  showLoaderOnConfirm: false,
+  imageUrl: null,
+  imageWidth: null,
+  imageHeight: null,
+  imageAlt: '',
+  imageClass: null,
+  timer: null,
+  width: null,
+  padding: null,
+  background: null,
+  input: null,
+  inputPlaceholder: '',
+  inputValue: '',
+  inputOptions: {},
+  inputAutoTrim: true,
+  inputClass: null,
+  inputAttributes: {},
+  inputValidator: null,
+  grow: false,
+  position: 'center',
+  progressSteps: [],
+  currentProgressStep: null,
+  progressStepsDistance: null,
+  onBeforeOpen: null,
+  onAfterClose: null,
+  onOpen: null,
+  onClose: null,
+  useRejections: false,
+  expectRejections: false
+};
+
+var deprecatedParams = ['useRejections', 'expectRejections'];
+
+/**
+ * Is valid parameter
+ * @param {String} paramName
+ */
+var isValidParameter = function isValidParameter(paramName) {
+  return defaultParams.hasOwnProperty(paramName) || paramName === 'extraParams';
+};
+
+/**
+ * Is deprecated parameter
+ * @param {String} paramName
+ */
+var isDeprecatedParameter = function isDeprecatedParameter(paramName) {
+  return deprecatedParams.indexOf(paramName) !== -1;
+};
+
+/**
+ * Show relevant warnings for given params
+ *
+ * @param params
+ */
+var showWarningsForParams = function showWarningsForParams(params) {
+  for (var param in params) {
+    if (!isValidParameter(param)) {
+      warn('Unknown parameter "' + param + '"');
+    }
+    if (isDeprecatedParameter(param)) {
+      warnOnce('The parameter "' + param + '" is deprecated and will be removed in the next major release.');
+    }
+  }
+};
+
+var deprecationWarning = '"setDefaults" & "resetDefaults" methods are deprecated in favor of "mixin" method and will be removed in the next major release. For new projects, use "mixin". For past projects already using "setDefaults", support will be provided through an additional package.';
+var defaults$1 = {};
+
+function withGlobalDefaults(ParentSwal) {
+  var SwalWithGlobalDefaults = function (_ParentSwal) {
+    inherits(SwalWithGlobalDefaults, _ParentSwal);
+
+    function SwalWithGlobalDefaults() {
+      classCallCheck(this, SwalWithGlobalDefaults);
+      return possibleConstructorReturn(this, (SwalWithGlobalDefaults.__proto__ || Object.getPrototypeOf(SwalWithGlobalDefaults)).apply(this, arguments));
+    }
+
+    createClass(SwalWithGlobalDefaults, [{
+      key: '_main',
+      value: function _main(params) {
+        return get(SwalWithGlobalDefaults.prototype.__proto__ || Object.getPrototypeOf(SwalWithGlobalDefaults.prototype), '_main', this).call(this, _extends({}, defaults$1, params));
+      }
+    }], [{
+      key: 'setDefaults',
+      value: function setDefaults(params) {
+        warnOnce(deprecationWarning);
+        if (!params || (typeof params === 'undefined' ? 'undefined' : _typeof(params)) !== 'object') {
+          throw new TypeError('SweetAlert2: The argument for setDefaults() is required and has to be a object');
+        }
+        showWarningsForParams(params);
+        // assign valid params from `params` to `defaults`
+        Object.keys(params).forEach(function (param) {
+          if (ParentSwal.isValidParameter(param)) {
+            defaults$1[param] = params[param];
+          }
+        });
+      }
+    }, {
+      key: 'resetDefaults',
+      value: function resetDefaults() {
+        warnOnce(deprecationWarning);
+        defaults$1 = {};
+      }
+    }]);
+    return SwalWithGlobalDefaults;
+  }(ParentSwal);
+
+  // Set default params if `window._swalDefaults` is an object
+
+
+  if (typeof window !== 'undefined' && _typeof(window._swalDefaults) === 'object') {
+    SwalWithGlobalDefaults.setDefaults(window._swalDefaults);
+  }
+
+  return SwalWithGlobalDefaults;
+}
+
+/**
+ * Returns an extended version of `Swal` containing `params` as defaults.
+ * Useful for reusing Swal configuration.
+ *
+ * For example:
+ *
+ * Before:
+ * const textPromptOptions = { input: 'text', showCancelButton: true }
+ * const {value: firstName} = await Swal({ ...textPromptOptions, title: 'What is your first name?' })
+ * const {value: lastName} = await Swal({ ...textPromptOptions, title: 'What is your last name?' })
+ *
+ * After:
+ * const TextPrompt = Swal.mixin({ input: 'text', showCancelButton: true })
+ * const {value: firstName} = await TextPrompt('What is your first name?')
+ * const {value: lastName} = await TextPrompt('What is your last name?')
+ *
+ * @param mixinParams
+ */
+function mixin(mixinParams) {
+  var Swal = this;
+  return withNoNewKeyword(function (_Swal) {
+    inherits(MixinSwal, _Swal);
+
+    function MixinSwal() {
+      classCallCheck(this, MixinSwal);
+      return possibleConstructorReturn(this, (MixinSwal.__proto__ || Object.getPrototypeOf(MixinSwal)).apply(this, arguments));
+    }
+
+    createClass(MixinSwal, [{
+      key: '_main',
+      value: function _main(params) {
+        return get(MixinSwal.prototype.__proto__ || Object.getPrototypeOf(MixinSwal.prototype), '_main', this).call(this, _extends({}, mixinParams, params));
+      }
+    }]);
+    return MixinSwal;
+  }(Swal));
+}
+
+// private global state for the queue feature
+var currentSteps = [];
+
+/*
+ * Global function for chaining sweetAlert popups
+ */
+var queue = function queue(steps) {
+  var swal = this;
+  currentSteps = steps;
+  var resetQueue = function resetQueue() {
+    currentSteps = [];
+    document.body.removeAttribute('data-swal2-queue-step');
+  };
+  var queueResult = [];
+  return new Promise(function (resolve, reject) {
+    (function step(i, callback) {
+      if (i < currentSteps.length) {
+        document.body.setAttribute('data-swal2-queue-step', i);
+
+        swal(currentSteps[i]).then(function (result) {
+          if (typeof result.value !== 'undefined') {
+            queueResult.push(result.value);
+            step(i + 1, callback);
+          } else {
+            resetQueue();
+            resolve({ dismiss: result.dismiss });
+          }
+        });
+      } else {
+        resetQueue();
+        resolve({ value: queueResult });
+      }
+    })(0);
+  });
+};
+
+/*
+ * Global function for getting the index of current popup in queue
+ */
+var getQueueStep = function getQueueStep() {
+  return document.body.getAttribute('data-swal2-queue-step');
+};
+
+/*
+ * Global function for inserting a popup to the queue
+ */
+var insertQueueStep = function insertQueueStep(step, index) {
+  if (index && index < currentSteps.length) {
+    return currentSteps.splice(index, 0, step);
+  }
+  return currentSteps.push(step);
+};
+
+/*
+ * Global function for deleting a popup from the queue
+ */
+var deleteQueueStep = function deleteQueueStep(index) {
+  if (typeof currentSteps[index] !== 'undefined') {
+    currentSteps.splice(index, 1);
+  }
+};
+
+/**
+ * Show spinner instead of Confirm button and disable Cancel button
+ */
+var showLoading = function showLoading() {
+  var popup = getPopup();
+  if (!popup) {
+    Swal('');
+  }
+  popup = getPopup();
+  var actions = getActions();
+  var confirmButton = getConfirmButton();
+  var cancelButton = getCancelButton();
+
+  show(actions);
+  show(confirmButton);
+  addClass([popup, actions], swalClasses.loading);
+  confirmButton.disabled = true;
+  cancelButton.disabled = true;
+
+  popup.setAttribute('data-loading', true);
+  popup.setAttribute('aria-busy', true);
+  popup.focus();
+};
+
+/**
+ * Show spinner instead of Confirm button and disable Cancel button
+ */
+var getTimerLeft = function getTimerLeft() {
+  return globalState.timeout && globalState.timeout.getTimerLeft();
+};
+
+
+
+var staticMethods = Object.freeze({
+	isValidParameter: isValidParameter,
+	isDeprecatedParameter: isDeprecatedParameter,
+	argsToParams: argsToParams,
+	adaptInputValidator: adaptInputValidator,
+	close: close,
+	closePopup: close,
+	closeModal: close,
+	closeToast: close,
+	isVisible: isVisible$1,
+	clickConfirm: clickConfirm,
+	clickCancel: clickCancel,
+	getPopup: getPopup,
+	getTitle: getTitle,
+	getContent: getContent,
+	getImage: getImage,
+	getButtonsWrapper: getButtonsWrapper,
+	getActions: getActions,
+	getConfirmButton: getConfirmButton,
+	getCancelButton: getCancelButton,
+	getFooter: getFooter,
+	isLoading: isLoading,
+	fire: fire,
+	mixin: mixin,
+	queue: queue,
+	getQueueStep: getQueueStep,
+	insertQueueStep: insertQueueStep,
+	deleteQueueStep: deleteQueueStep,
+	showLoading: showLoading,
+	enableLoading: showLoading,
+	getTimerLeft: getTimerLeft
+});
+
+// https://github.com/Riim/symbol-polyfill/blob/master/index.js
+
+var _Symbol = typeof Symbol === 'function' ? Symbol : function () {
+  var idCounter = 0;
+  function _Symbol(key) {
+    return '__' + key + '_' + Math.floor(Math.random() * 1e9) + '_' + ++idCounter + '__';
+  }
+  _Symbol.iterator = _Symbol('Symbol.iterator');
+  return _Symbol;
+}();
+
+// WeakMap polyfill, needed for Android 4.4
+// Related issue: https://github.com/sweetalert2/sweetalert2/issues/1071
+// http://webreflection.blogspot.fi/2015/04/a-weakmap-polyfill-in-20-lines-of-code.html
+
+var WeakMap$1 = typeof WeakMap === 'function' ? WeakMap : function (s, dP, hOP) {
+  function WeakMap() {
+    dP(this, s, { value: _Symbol('WeakMap') });
+  }
+  WeakMap.prototype = {
+    'delete': function del(o) {
+      delete o[this[s]];
+    },
+    get: function get(o) {
+      return o[this[s]];
+    },
+    has: function has(o) {
+      return hOP.call(o, this[s]);
+    },
+    set: function set(o, v) {
+      dP(o, this[s], { configurable: true, value: v });
+    }
+  };
+  return WeakMap;
+}(_Symbol('WeakMap'), Object.defineProperty, {}.hasOwnProperty);
+
+/**
+ * This module containts `WeakMap`s for each effectively-"private  property" that a `swal` has.
+ * For example, to set the private property "foo" of `this` to "bar", you can `privateProps.foo.set(this, 'bar')`
+ * This is the approach that Babel will probably take to implement private methods/fields
+ *   https://github.com/tc39/proposal-private-methods
+ *   https://github.com/babel/babel/pull/7555
+ * Once we have the changes from that PR in Babel, and our core class fits reasonable in *one module*
+ *   then we can use that language feature.
+ */
+
+var privateProps = {
+  promise: new WeakMap$1(),
+  innerParams: new WeakMap$1(),
+  domCache: new WeakMap$1()
+};
+
+/**
+ * Show spinner instead of Confirm button and disable Cancel button
+ */
+function hideLoading() {
+  var innerParams = privateProps.innerParams.get(this);
+  var domCache = privateProps.domCache.get(this);
+  if (!innerParams.showConfirmButton) {
+    hide(domCache.confirmButton);
+    if (!innerParams.showCancelButton) {
+      hide(domCache.actions);
+    }
+  }
+  removeClass([domCache.popup, domCache.actions], swalClasses.loading);
+  domCache.popup.removeAttribute('aria-busy');
+  domCache.popup.removeAttribute('data-loading');
+  domCache.confirmButton.disabled = false;
+  domCache.cancelButton.disabled = false;
+}
+
+// Get input element by specified type or, if type isn't specified, by params.input
+function getInput(inputType) {
+  var innerParams = privateProps.innerParams.get(this);
+  var domCache = privateProps.domCache.get(this);
+  inputType = inputType || innerParams.input;
+  if (!inputType) {
+    return null;
+  }
+  switch (inputType) {
+    case 'select':
+    case 'textarea':
+    case 'file':
+      return getChildByClass(domCache.content, swalClasses[inputType]);
+    case 'checkbox':
+      return domCache.popup.querySelector('.' + swalClasses.checkbox + ' input');
+    case 'radio':
+      return domCache.popup.querySelector('.' + swalClasses.radio + ' input:checked') || domCache.popup.querySelector('.' + swalClasses.radio + ' input:first-child');
+    case 'range':
+      return domCache.popup.querySelector('.' + swalClasses.range + ' input');
+    default:
+      return getChildByClass(domCache.content, swalClasses.input);
+  }
+}
+
+function enableButtons() {
+  var domCache = privateProps.domCache.get(this);
+  domCache.confirmButton.disabled = false;
+  domCache.cancelButton.disabled = false;
+}
+
+function disableButtons() {
+  var domCache = privateProps.domCache.get(this);
+  domCache.confirmButton.disabled = true;
+  domCache.cancelButton.disabled = true;
+}
+
+function enableConfirmButton() {
+  var domCache = privateProps.domCache.get(this);
+  domCache.confirmButton.disabled = false;
+}
+
+function disableConfirmButton() {
+  var domCache = privateProps.domCache.get(this);
+  domCache.confirmButton.disabled = true;
+}
+
+function enableInput() {
+  var input = this.getInput();
+  if (!input) {
+    return false;
+  }
+  if (input.type === 'radio') {
+    var radiosContainer = input.parentNode.parentNode;
+    var radios = radiosContainer.querySelectorAll('input');
+    for (var i = 0; i < radios.length; i++) {
+      radios[i].disabled = false;
+    }
+  } else {
+    input.disabled = false;
+  }
+}
+
+function disableInput() {
+  var input = this.getInput();
+  if (!input) {
+    return false;
+  }
+  if (input && input.type === 'radio') {
+    var radiosContainer = input.parentNode.parentNode;
+    var radios = radiosContainer.querySelectorAll('input');
+    for (var i = 0; i < radios.length; i++) {
+      radios[i].disabled = true;
+    }
+  } else {
+    input.disabled = true;
+  }
+}
+
+// Show block with validation error
+function showValidationError(error) {
+  var domCache = privateProps.domCache.get(this);
+  domCache.validationError.innerHTML = error;
+  var popupComputedStyle = window.getComputedStyle(domCache.popup);
+  domCache.validationError.style.marginLeft = '-' + popupComputedStyle.getPropertyValue('padding-left');
+  domCache.validationError.style.marginRight = '-' + popupComputedStyle.getPropertyValue('padding-right');
+  show(domCache.validationError);
+
+  var input = this.getInput();
+  if (input) {
+    input.setAttribute('aria-invalid', true);
+    input.setAttribute('aria-describedBy', swalClasses.validationerror);
+    focusInput(input);
+    addClass(input, swalClasses.inputerror);
+  }
+}
+
+// Hide block with validation error
+function resetValidationError() {
+  var domCache = privateProps.domCache.get(this);
+  if (domCache.validationError) {
+    hide(domCache.validationError);
+  }
+
+  var input = this.getInput();
+  if (input) {
+    input.removeAttribute('aria-invalid');
+    input.removeAttribute('aria-describedBy');
+    removeClass(input, swalClasses.inputerror);
+  }
+}
+
+var Timer = function Timer(callback, delay) {
+  classCallCheck(this, Timer);
+
+  var id, started, running;
+  var remaining = delay;
+  this.start = function () {
+    running = true;
+    started = new Date();
+    id = setTimeout(callback, remaining);
+  };
+  this.stop = function () {
+    running = false;
+    clearTimeout(id);
+    remaining -= new Date() - started;
+  };
+  this.getTimerLeft = function () {
+    if (running) {
+      this.stop();
+      this.start();
+    }
+    return remaining;
+  };
+  this.getStateRunning = function () {
+    return running;
+  };
+  this.start();
+};
+
+var defaultInputValidators = {
+  email: function email(string, extraParams) {
+    return (/^[a-zA-Z0-9.+_-]+@[a-zA-Z0-9.-]+\.[a-zA-Z0-9-]{2,24}$/.test(string) ? Promise.resolve() : Promise.reject(extraParams && extraParams.validationMessage ? extraParams.validationMessage : 'Invalid email address')
+    );
+  },
+  url: function url(string, extraParams) {
+    // taken from https://stackoverflow.com/a/3809435/1331425
+    return (/^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)$/.test(string) ? Promise.resolve() : Promise.reject(extraParams && extraParams.validationMessage ? extraParams.validationMessage : 'Invalid URL')
+    );
+  }
+};
+
+/**
+ * Set type, text and actions on popup
+ *
+ * @param params
+ * @returns {boolean}
+ */
+function setParameters(params) {
+  // Use default `inputValidator` for supported input types if not provided
+  if (!params.inputValidator) {
+    Object.keys(defaultInputValidators).forEach(function (key) {
+      if (params.input === key) {
+        params.inputValidator = params.expectRejections ? defaultInputValidators[key] : Swal.adaptInputValidator(defaultInputValidators[key]);
+      }
+    });
+  }
+
+  // Determine if the custom target element is valid
+  if (!params.target || typeof params.target === 'string' && !document.querySelector(params.target) || typeof params.target !== 'string' && !params.target.appendChild) {
+    warn('Target parameter is not valid, defaulting to "body"');
+    params.target = 'body';
+  }
+
+  var popup = void 0;
+  var oldPopup = getPopup();
+  var targetElement = typeof params.target === 'string' ? document.querySelector(params.target) : params.target;
+  // If the model target has changed, refresh the popup
+  if (oldPopup && targetElement && oldPopup.parentNode !== targetElement.parentNode) {
+    popup = init(params);
+  } else {
+    popup = oldPopup || init(params);
+  }
+
+  // Set popup width
+  if (params.width) {
+    popup.style.width = typeof params.width === 'number' ? params.width + 'px' : params.width;
+  }
+
+  // Set popup padding
+  if (params.padding) {
+    popup.style.padding = typeof params.padding === 'number' ? params.padding + 'px' : params.padding;
+  }
+
+  // Set popup background
+  if (params.background) {
+    popup.style.background = params.background;
+  }
+  var popupBackgroundColor = window.getComputedStyle(popup).getPropertyValue('background-color');
+  var successIconParts = popup.querySelectorAll('[class^=swal2-success-circular-line], .swal2-success-fix');
+  for (var i = 0; i < successIconParts.length; i++) {
+    successIconParts[i].style.backgroundColor = popupBackgroundColor;
+  }
+
+  var container = getContainer();
+  var title = getTitle();
+  var content = getContent().querySelector('#' + swalClasses.content);
+  var actions = getActions();
+  var confirmButton = getConfirmButton();
+  var cancelButton = getCancelButton();
+  var closeButton = getCloseButton();
+  var footer = getFooter();
+
+  // Title
+  if (params.titleText) {
+    title.innerText = params.titleText;
+  } else if (params.title) {
+    title.innerHTML = params.title.split('\n').join('<br />');
+  }
+
+  if (typeof params.backdrop === 'string') {
+    getContainer().style.background = params.backdrop;
+  } else if (!params.backdrop) {
+    addClass([document.documentElement, document.body], swalClasses['no-backdrop']);
+  }
+
+  // Content as HTML
+  if (params.html) {
+    parseHtmlToContainer(params.html, content);
+
+    // Content as plain text
+  } else if (params.text) {
+    content.textContent = params.text;
+    show(content);
+  } else {
+    hide(content);
+  }
+
+  // Position
+  if (params.position in swalClasses) {
+    addClass(container, swalClasses[params.position]);
+  } else {
+    warn('The "position" parameter is not valid, defaulting to "center"');
+    addClass(container, swalClasses.center);
+  }
+
+  // Grow
+  if (params.grow && typeof params.grow === 'string') {
+    var growClass = 'grow-' + params.grow;
+    if (growClass in swalClasses) {
+      addClass(container, swalClasses[growClass]);
+    }
+  }
+
+  // Animation
+  if (typeof params.animation === 'function') {
+    params.animation = params.animation.call();
+  }
+
+  // Close button
+  if (params.showCloseButton) {
+    closeButton.setAttribute('aria-label', params.closeButtonAriaLabel);
+    show(closeButton);
+  } else {
+    hide(closeButton);
+  }
+
+  // Default Class
+  popup.className = swalClasses.popup;
+  if (params.toast) {
+    addClass([document.documentElement, document.body], swalClasses['toast-shown']);
+    addClass(popup, swalClasses.toast);
+  } else {
+    addClass(popup, swalClasses.modal);
+  }
+
+  // Custom Class
+  if (params.customClass) {
+    addClass(popup, params.customClass);
+  }
+
+  // Progress steps
+  var progressStepsContainer = getProgressSteps();
+  var currentProgressStep = parseInt(params.currentProgressStep === null ? Swal.getQueueStep() : params.currentProgressStep, 10);
+  if (params.progressSteps && params.progressSteps.length) {
+    show(progressStepsContainer);
+    empty(progressStepsContainer);
+    if (currentProgressStep >= params.progressSteps.length) {
+      warn('Invalid currentProgressStep parameter, it should be less than progressSteps.length ' + '(currentProgressStep like JS arrays starts from 0)');
+    }
+    params.progressSteps.forEach(function (step, index) {
+      var circle = document.createElement('li');
+      addClass(circle, swalClasses.progresscircle);
+      circle.innerHTML = step;
+      if (index === currentProgressStep) {
+        addClass(circle, swalClasses.activeprogressstep);
+      }
+      progressStepsContainer.appendChild(circle);
+      if (index !== params.progressSteps.length - 1) {
+        var line = document.createElement('li');
+        addClass(line, swalClasses.progressline);
+        if (params.progressStepsDistance) {
+          line.style.width = params.progressStepsDistance;
+        }
+        progressStepsContainer.appendChild(line);
+      }
+    });
+  } else {
+    hide(progressStepsContainer);
+  }
+
+  // Icon
+  var icons = getIcons();
+  for (var _i = 0; _i < icons.length; _i++) {
+    hide(icons[_i]);
+  }
+  if (params.type) {
+    var validType = false;
+    for (var iconType in iconTypes) {
+      if (params.type === iconType) {
+        validType = true;
+        break;
+      }
+    }
+    if (!validType) {
+      error('Unknown alert type: ' + params.type);
+      return false;
+    }
+    var icon = popup.querySelector('.' + swalClasses.icon + '.' + iconTypes[params.type]);
+    show(icon);
+
+    // Animate icon
+    if (params.animation) {
+      addClass(icon, 'swal2-animate-' + params.type + '-icon');
+    }
+  }
+
+  // Custom image
+  var image = getImage();
+  if (params.imageUrl) {
+    image.setAttribute('src', params.imageUrl);
+    image.setAttribute('alt', params.imageAlt);
+    show(image);
+
+    if (params.imageWidth) {
+      image.setAttribute('width', params.imageWidth);
+    } else {
+      image.removeAttribute('width');
+    }
+
+    if (params.imageHeight) {
+      image.setAttribute('height', params.imageHeight);
+    } else {
+      image.removeAttribute('height');
+    }
+
+    image.className = swalClasses.image;
+    if (params.imageClass) {
+      addClass(image, params.imageClass);
+    }
+  } else {
+    hide(image);
+  }
+
+  // Cancel button
+  if (params.showCancelButton) {
+    cancelButton.style.display = 'inline-block';
+  } else {
+    hide(cancelButton);
+  }
+
+  // Confirm button
+  if (params.showConfirmButton) {
+    removeStyleProperty(confirmButton, 'display');
+  } else {
+    hide(confirmButton);
+  }
+
+  // Actions (buttons) wrapper
+  if (!params.showConfirmButton && !params.showCancelButton) {
+    hide(actions);
+  } else {
+    show(actions);
+  }
+
+  // Edit text on confirm and cancel buttons
+  confirmButton.innerHTML = params.confirmButtonText;
+  cancelButton.innerHTML = params.cancelButtonText;
+
+  // ARIA labels for confirm and cancel buttons
+  confirmButton.setAttribute('aria-label', params.confirmButtonAriaLabel);
+  cancelButton.setAttribute('aria-label', params.cancelButtonAriaLabel);
+
+  // Add buttons custom classes
+  confirmButton.className = swalClasses.confirm;
+  addClass(confirmButton, params.confirmButtonClass);
+  cancelButton.className = swalClasses.cancel;
+  addClass(cancelButton, params.cancelButtonClass);
+
+  // Buttons styling
+  if (params.buttonsStyling) {
+    addClass([confirmButton, cancelButton], swalClasses.styled);
+
+    // Buttons background colors
+    if (params.confirmButtonColor) {
+      confirmButton.style.backgroundColor = params.confirmButtonColor;
+    }
+    if (params.cancelButtonColor) {
+      cancelButton.style.backgroundColor = params.cancelButtonColor;
+    }
+
+    // Loading state
+    var confirmButtonBackgroundColor = window.getComputedStyle(confirmButton).getPropertyValue('background-color');
+    confirmButton.style.borderLeftColor = confirmButtonBackgroundColor;
+    confirmButton.style.borderRightColor = confirmButtonBackgroundColor;
+  } else {
+    removeClass([confirmButton, cancelButton], swalClasses.styled);
+
+    confirmButton.style.backgroundColor = confirmButton.style.borderLeftColor = confirmButton.style.borderRightColor = '';
+    cancelButton.style.backgroundColor = cancelButton.style.borderLeftColor = cancelButton.style.borderRightColor = '';
+  }
+
+  // Footer
+  parseHtmlToContainer(params.footer, footer);
+
+  // CSS animation
+  if (params.animation === true) {
+    removeClass(popup, swalClasses.noanimation);
+  } else {
+    addClass(popup, swalClasses.noanimation);
+  }
+
+  // showLoaderOnConfirm && preConfirm
+  if (params.showLoaderOnConfirm && !params.preConfirm) {
+    warn('showLoaderOnConfirm is set to true, but preConfirm is not defined.\n' + 'showLoaderOnConfirm should be used together with preConfirm, see usage example:\n' + 'https://sweetalert2.github.io/#ajax-request');
+  }
+}
+
+/**
+ * Open popup, add necessary classes and styles, fix scrollbar
+ *
+ * @param {Array} params
+ */
+var openPopup = function openPopup(params) {
+  var container = getContainer();
+  var popup = getPopup();
+
+  if (params.onBeforeOpen !== null && typeof params.onBeforeOpen === 'function') {
+    params.onBeforeOpen(popup);
+  }
+
+  if (params.animation) {
+    addClass(popup, swalClasses.show);
+    addClass(container, swalClasses.fade);
+    removeClass(popup, swalClasses.hide);
+  } else {
+    removeClass(popup, swalClasses.fade);
+  }
+  show(popup);
+
+  // scrolling is 'hidden' until animation is done, after that 'auto'
+  container.style.overflowY = 'hidden';
+  if (animationEndEvent && !hasClass(popup, swalClasses.noanimation)) {
+    popup.addEventListener(animationEndEvent, function swalCloseEventFinished() {
+      popup.removeEventListener(animationEndEvent, swalCloseEventFinished);
+      container.style.overflowY = 'auto';
+    });
+  } else {
+    container.style.overflowY = 'auto';
+  }
+
+  addClass([document.documentElement, document.body, container], swalClasses.shown);
+  if (params.heightAuto && params.backdrop && !params.toast) {
+    addClass([document.documentElement, document.body], swalClasses['height-auto']);
+  }
+
+  if (isModal()) {
+    fixScrollbar();
+    iOSfix();
+  }
+  if (!globalState.previousActiveElement) {
+    globalState.previousActiveElement = document.activeElement;
+  }
+  if (params.onOpen !== null && typeof params.onOpen === 'function') {
+    setTimeout(function () {
+      params.onOpen(popup);
+    });
+  }
+};
+
+function _main(userParams) {
+  var _this = this;
+
+  showWarningsForParams(userParams);
+
+  var innerParams = _extends({}, defaultParams, userParams);
+  setParameters(innerParams);
+  Object.freeze(innerParams);
+  privateProps.innerParams.set(this, innerParams);
+
+  // clear the previous timer
+  if (globalState.timeout) {
+    globalState.timeout.stop();
+    delete globalState.timeout;
+  }
+
+  // clear the restore focus timeout
+  clearTimeout(globalState.restoreFocusTimeout);
+
+  var domCache = {
+    popup: getPopup(),
+    container: getContainer(),
+    content: getContent(),
+    actions: getActions(),
+    confirmButton: getConfirmButton(),
+    cancelButton: getCancelButton(),
+    closeButton: getCloseButton(),
+    validationError: getValidationError(),
+    progressSteps: getProgressSteps()
+  };
+  privateProps.domCache.set(this, domCache);
+
+  var constructor = this.constructor;
+
+  return new Promise(function (resolve, reject) {
+    // functions to handle all resolving/rejecting/settling
+    var succeedWith = function succeedWith(value) {
+      constructor.closePopup(innerParams.onClose, innerParams.onAfterClose); // TODO: make closePopup an *instance* method
+      if (innerParams.useRejections) {
+        resolve(value);
+      } else {
+        resolve({ value: value });
+      }
+    };
+    var dismissWith = function dismissWith(dismiss) {
+      constructor.closePopup(innerParams.onClose, innerParams.onAfterClose);
+      if (innerParams.useRejections) {
+        reject(dismiss);
+      } else {
+        resolve({ dismiss: dismiss });
+      }
+    };
+    var errorWith = function errorWith(error$$1) {
+      constructor.closePopup(innerParams.onClose, innerParams.onAfterClose);
+      reject(error$$1);
+    };
+
+    // Close on timer
+    if (innerParams.timer) {
+      globalState.timeout = new Timer(function () {
+        dismissWith('timer');
+        delete globalState.timeout;
+      }, innerParams.timer);
+    }
+
+    // Get the value of the popup input
+    var getInputValue = function getInputValue() {
+      var input = _this.getInput();
+      if (!input) {
+        return null;
+      }
+      switch (innerParams.input) {
+        case 'checkbox':
+          return input.checked ? 1 : 0;
+        case 'radio':
+          return input.checked ? input.value : null;
+        case 'file':
+          return input.files.length ? input.files[0] : null;
+        default:
+          return innerParams.inputAutoTrim ? input.value.trim() : input.value;
+      }
+    };
+
+    // input autofocus
+    if (innerParams.input) {
+      setTimeout(function () {
+        var input = _this.getInput();
+        if (input) {
+          focusInput(input);
+        }
+      }, 0);
+    }
+
+    var confirm = function confirm(value) {
+      if (innerParams.showLoaderOnConfirm) {
+        constructor.showLoading(); // TODO: make showLoading an *instance* method
+      }
+
+      if (innerParams.preConfirm) {
+        _this.resetValidationError();
+        var preConfirmPromise = Promise.resolve().then(function () {
+          return innerParams.preConfirm(value, innerParams.extraParams);
+        });
+        if (innerParams.expectRejections) {
+          preConfirmPromise.then(function (preConfirmValue) {
+            return succeedWith(preConfirmValue || value);
+          }, function (validationError) {
+            _this.hideLoading();
+            if (validationError) {
+              _this.showValidationError(validationError);
+            }
+          });
+        } else {
+          preConfirmPromise.then(function (preConfirmValue) {
+            if (isVisible(domCache.validationError) || preConfirmValue === false) {
+              _this.hideLoading();
+            } else {
+              succeedWith(preConfirmValue || value);
+            }
+          }, function (error$$1) {
+            return errorWith(error$$1);
+          });
+        }
+      } else {
+        succeedWith(value);
+      }
+    };
+
+    // Mouse interactions
+    var onButtonEvent = function onButtonEvent(event) {
+      var e = event || window.event;
+      var target = e.target || e.srcElement;
+      var confirmButton = domCache.confirmButton,
+          cancelButton = domCache.cancelButton;
+
+      var targetedConfirm = confirmButton && (confirmButton === target || confirmButton.contains(target));
+      var targetedCancel = cancelButton && (cancelButton === target || cancelButton.contains(target));
+
+      switch (e.type) {
+        case 'click':
+          // Clicked 'confirm'
+          if (targetedConfirm && constructor.isVisible()) {
+            _this.disableButtons();
+            if (innerParams.input) {
+              var inputValue = getInputValue();
+
+              if (innerParams.inputValidator) {
+                _this.disableInput();
+                var validationPromise = Promise.resolve().then(function () {
+                  return innerParams.inputValidator(inputValue, innerParams.extraParams);
+                });
+                if (innerParams.expectRejections) {
+                  validationPromise.then(function () {
+                    _this.enableButtons();
+                    _this.enableInput();
+                    confirm(inputValue);
+                  }, function (validationError) {
+                    _this.enableButtons();
+                    _this.enableInput();
+                    if (validationError) {
+                      _this.showValidationError(validationError);
+                    }
+                  });
+                } else {
+                  validationPromise.then(function (validationError) {
+                    _this.enableButtons();
+                    _this.enableInput();
+                    if (validationError) {
+                      _this.showValidationError(validationError);
+                    } else {
+                      confirm(inputValue);
+                    }
+                  }, function (error$$1) {
+                    return errorWith(error$$1);
+                  });
+                }
+              } else {
+                confirm(inputValue);
+              }
+            } else {
+              confirm(true);
+            }
+
+            // Clicked 'cancel'
+          } else if (targetedCancel && constructor.isVisible()) {
+            _this.disableButtons();
+            dismissWith(constructor.DismissReason.cancel);
+          }
+          break;
+        default:
+      }
+    };
+
+    var buttons = domCache.popup.querySelectorAll('button');
+    for (var i = 0; i < buttons.length; i++) {
+      buttons[i].onclick = onButtonEvent;
+      buttons[i].onmouseover = onButtonEvent;
+      buttons[i].onmouseout = onButtonEvent;
+      buttons[i].onmousedown = onButtonEvent;
+    }
+
+    // Closing popup by close button
+    domCache.closeButton.onclick = function () {
+      dismissWith(constructor.DismissReason.close);
+    };
+
+    if (innerParams.toast) {
+      // Closing popup by internal click
+      domCache.popup.onclick = function (e) {
+        if (innerParams.showConfirmButton || innerParams.showCancelButton || innerParams.showCloseButton || innerParams.input) {
+          return;
+        }
+        constructor.closePopup(innerParams.onClose, innerParams.onAfterClose);
+        dismissWith(constructor.DismissReason.close);
+      };
+    } else {
+      var ignoreOutsideClick = false;
+
+      // Ignore click events that had mousedown on the popup but mouseup on the container
+      // This can happen when the user drags a slider
+      domCache.popup.onmousedown = function () {
+        domCache.container.onmouseup = function (e) {
+          domCache.container.onmouseup = undefined;
+          // We only check if the mouseup target is the container because usually it doesn't
+          // have any other direct children aside of the popup
+          if (e.target === domCache.container) {
+            ignoreOutsideClick = true;
+          }
+        };
+      };
+
+      // Ignore click events that had mousedown on the container but mouseup on the popup
+      domCache.container.onmousedown = function () {
+        domCache.popup.onmouseup = function (e) {
+          domCache.popup.onmouseup = undefined;
+          // We also need to check if the mouseup target is a child of the popup
+          if (e.target === domCache.popup || domCache.popup.contains(e.target)) {
+            ignoreOutsideClick = true;
+          }
+        };
+      };
+
+      domCache.container.onclick = function (e) {
+        if (ignoreOutsideClick) {
+          ignoreOutsideClick = false;
+          return;
+        }
+        if (e.target !== domCache.container) {
+          return;
+        }
+        if (callIfFunction(innerParams.allowOutsideClick)) {
+          dismissWith(constructor.DismissReason.backdrop);
+        }
+      };
+    }
+
+    // Reverse buttons (Confirm on the right side)
+    if (innerParams.reverseButtons) {
+      domCache.confirmButton.parentNode.insertBefore(domCache.cancelButton, domCache.confirmButton);
+    } else {
+      domCache.confirmButton.parentNode.insertBefore(domCache.confirmButton, domCache.cancelButton);
+    }
+
+    // Focus handling
+    var setFocus = function setFocus(index, increment) {
+      var focusableElements = getFocusableElements(innerParams.focusCancel);
+      // search for visible elements and select the next possible match
+      for (var _i = 0; _i < focusableElements.length; _i++) {
+        index = index + increment;
+
+        // rollover to first item
+        if (index === focusableElements.length) {
+          index = 0;
+
+          // go to last item
+        } else if (index === -1) {
+          index = focusableElements.length - 1;
+        }
+
+        // determine if element is visible
+        var el = focusableElements[index];
+        if (isVisible(el)) {
+          return el.focus();
+        }
+      }
+      // no visible focusable elements, focus the popup
+      domCache.popup.focus();
+    };
+
+    var keydownHandler = function keydownHandler(e, innerParams) {
+      if (innerParams.stopKeydownPropagation) {
+        e.stopPropagation();
+      }
+
+      var arrowKeys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Left', 'Right', 'Up', 'Down' // IE11
+      ];
+
+      if (e.key === 'Enter' && !e.isComposing) {
+        if (e.target && _this.getInput() && e.target.outerHTML === _this.getInput().outerHTML) {
+          if (['textarea', 'file'].indexOf(innerParams.input) !== -1) {
+            return; // do not submit
+          }
+
+          constructor.clickConfirm();
+          e.preventDefault();
+        }
+
+        // TAB
+      } else if (e.key === 'Tab') {
+        var targetElement = e.target || e.srcElement;
+
+        var focusableElements = getFocusableElements(innerParams.focusCancel);
+        var btnIndex = -1; // Find the button - note, this is a nodelist, not an array.
+        for (var _i2 = 0; _i2 < focusableElements.length; _i2++) {
+          if (targetElement === focusableElements[_i2]) {
+            btnIndex = _i2;
+            break;
+          }
+        }
+
+        if (!e.shiftKey) {
+          // Cycle to the next button
+          setFocus(btnIndex, 1);
+        } else {
+          // Cycle to the prev button
+          setFocus(btnIndex, -1);
+        }
+        e.stopPropagation();
+        e.preventDefault();
+
+        // ARROWS - switch focus between buttons
+      } else if (arrowKeys.indexOf(e.key) !== -1) {
+        // focus Cancel button if Confirm button is currently focused
+        if (document.activeElement === domCache.confirmButton && isVisible(domCache.cancelButton)) {
+          domCache.cancelButton.focus();
+          // and vice versa
+        } else if (document.activeElement === domCache.cancelButton && isVisible(domCache.confirmButton)) {
+          domCache.confirmButton.focus();
+        }
+
+        // ESC
+      } else if ((e.key === 'Escape' || e.key === 'Esc') && callIfFunction(innerParams.allowEscapeKey) === true) {
+        dismissWith(constructor.DismissReason.esc);
+      }
+    };
+
+    if (globalState.keydownHandlerAdded) {
+      globalState.keydownTarget.removeEventListener('keydown', globalState.keydownHandler, { capture: globalState.keydownListenerCapture });
+      globalState.keydownHandlerAdded = false;
+    }
+
+    if (!innerParams.toast) {
+      globalState.keydownHandler = function (e) {
+        return keydownHandler(e, innerParams);
+      };
+      globalState.keydownTarget = innerParams.keydownListenerCapture ? window : domCache.popup;
+      globalState.keydownListenerCapture = innerParams.keydownListenerCapture;
+      globalState.keydownTarget.addEventListener('keydown', globalState.keydownHandler, { capture: globalState.keydownListenerCapture });
+      globalState.keydownHandlerAdded = true;
+    }
+
+    _this.enableButtons();
+    _this.hideLoading();
+    _this.resetValidationError();
+
+    if (innerParams.input) {
+      addClass(document.body, swalClasses['has-input']);
+    }
+
+    // inputs
+    var inputTypes = ['input', 'file', 'range', 'select', 'radio', 'checkbox', 'textarea'];
+    var input = void 0;
+    for (var _i3 = 0; _i3 < inputTypes.length; _i3++) {
+      var inputClass = swalClasses[inputTypes[_i3]];
+      var inputContainer = getChildByClass(domCache.content, inputClass);
+      input = _this.getInput(inputTypes[_i3]);
+
+      // set attributes
+      if (input) {
+        for (var j in input.attributes) {
+          if (input.attributes.hasOwnProperty(j)) {
+            var attrName = input.attributes[j].name;
+            if (attrName !== 'type' && attrName !== 'value') {
+              input.removeAttribute(attrName);
+            }
+          }
+        }
+        for (var attr in innerParams.inputAttributes) {
+          input.setAttribute(attr, innerParams.inputAttributes[attr]);
+        }
+      }
+
+      // set class
+      inputContainer.className = inputClass;
+      if (innerParams.inputClass) {
+        addClass(inputContainer, innerParams.inputClass);
+      }
+
+      hide(inputContainer);
+    }
+
+    var populateInputOptions = void 0;
+    switch (innerParams.input) {
+      case 'text':
+      case 'email':
+      case 'password':
+      case 'number':
+      case 'tel':
+      case 'url':
+        input = getChildByClass(domCache.content, swalClasses.input);
+        input.value = innerParams.inputValue;
+        input.placeholder = innerParams.inputPlaceholder;
+        input.type = innerParams.input;
+        show(input);
+        break;
+      case 'file':
+        input = getChildByClass(domCache.content, swalClasses.file);
+        input.placeholder = innerParams.inputPlaceholder;
+        input.type = innerParams.input;
+        show(input);
+        break;
+      case 'range':
+        var range = getChildByClass(domCache.content, swalClasses.range);
+        var rangeInput = range.querySelector('input');
+        var rangeOutput = range.querySelector('output');
+        rangeInput.value = innerParams.inputValue;
+        rangeInput.type = innerParams.input;
+        rangeOutput.value = innerParams.inputValue;
+        show(range);
+        break;
+      case 'select':
+        var select = getChildByClass(domCache.content, swalClasses.select);
+        select.innerHTML = '';
+        if (innerParams.inputPlaceholder) {
+          var placeholder = document.createElement('option');
+          placeholder.innerHTML = innerParams.inputPlaceholder;
+          placeholder.value = '';
+          placeholder.disabled = true;
+          placeholder.selected = true;
+          select.appendChild(placeholder);
+        }
+        populateInputOptions = function populateInputOptions(inputOptions) {
+          inputOptions.forEach(function (_ref) {
+            var _ref2 = slicedToArray(_ref, 2),
+                optionValue = _ref2[0],
+                optionLabel = _ref2[1];
+
+            var option = document.createElement('option');
+            option.value = optionValue;
+            option.innerHTML = optionLabel;
+            if (innerParams.inputValue.toString() === optionValue.toString()) {
+              option.selected = true;
+            }
+            select.appendChild(option);
+          });
+          show(select);
+          select.focus();
+        };
+        break;
+      case 'radio':
+        var radio = getChildByClass(domCache.content, swalClasses.radio);
+        radio.innerHTML = '';
+        populateInputOptions = function populateInputOptions(inputOptions) {
+          inputOptions.forEach(function (_ref3) {
+            var _ref4 = slicedToArray(_ref3, 2),
+                radioValue = _ref4[0],
+                radioLabel = _ref4[1];
+
+            var radioInput = document.createElement('input');
+            var radioLabelElement = document.createElement('label');
+            radioInput.type = 'radio';
+            radioInput.name = swalClasses.radio;
+            radioInput.value = radioValue;
+            if (innerParams.inputValue.toString() === radioValue.toString()) {
+              radioInput.checked = true;
+            }
+            radioLabelElement.innerHTML = radioLabel;
+            radioLabelElement.insertBefore(radioInput, radioLabelElement.firstChild);
+            radio.appendChild(radioLabelElement);
+          });
+          show(radio);
+          var radios = radio.querySelectorAll('input');
+          if (radios.length) {
+            radios[0].focus();
+          }
+        };
+        break;
+      case 'checkbox':
+        var checkbox = getChildByClass(domCache.content, swalClasses.checkbox);
+        var checkboxInput = _this.getInput('checkbox');
+        checkboxInput.type = 'checkbox';
+        checkboxInput.value = 1;
+        checkboxInput.id = swalClasses.checkbox;
+        checkboxInput.checked = Boolean(innerParams.inputValue);
+        var label = checkbox.getElementsByTagName('span');
+        if (label.length) {
+          checkbox.removeChild(label[0]);
+        }
+        label = document.createElement('span');
+        label.innerHTML = innerParams.inputPlaceholder;
+        checkbox.appendChild(label);
+        show(checkbox);
+        break;
+      case 'textarea':
+        var textarea = getChildByClass(domCache.content, swalClasses.textarea);
+        textarea.value = innerParams.inputValue;
+        textarea.placeholder = innerParams.inputPlaceholder;
+        show(textarea);
+        break;
+      case null:
+        break;
+      default:
+        error('Unexpected type of input! Expected "text", "email", "password", "number", "tel", "select", "radio", "checkbox", "textarea", "file" or "url", got "' + innerParams.input + '"');
+        break;
+    }
+
+    if (innerParams.input === 'select' || innerParams.input === 'radio') {
+      var processInputOptions = function processInputOptions(inputOptions) {
+        return populateInputOptions(formatInputOptions(inputOptions));
+      };
+      if (isThenable(innerParams.inputOptions)) {
+        constructor.showLoading();
+        innerParams.inputOptions.then(function (inputOptions) {
+          _this.hideLoading();
+          processInputOptions(inputOptions);
+        });
+      } else if (_typeof(innerParams.inputOptions) === 'object') {
+        processInputOptions(innerParams.inputOptions);
+      } else {
+        error('Unexpected type of inputOptions! Expected object, Map or Promise, got ' + _typeof(innerParams.inputOptions));
+      }
+    } else if (['text', 'email', 'number', 'tel', 'textarea'].indexOf(innerParams.input) !== -1 && isThenable(innerParams.inputValue)) {
+      constructor.showLoading();
+      hide(input);
+      innerParams.inputValue.then(function (inputValue) {
+        input.value = innerParams.input === 'number' ? parseFloat(inputValue) || 0 : inputValue + '';
+        show(input);
+        _this.hideLoading();
+      }).catch(function (err) {
+        error('Error in inputValue promise: ' + err);
+        input.value = '';
+        show(input);
+        _this.hideLoading();
+      });
+    }
+
+    openPopup(innerParams);
+
+    if (!innerParams.toast) {
+      if (!callIfFunction(innerParams.allowEnterKey)) {
+        if (document.activeElement) {
+          document.activeElement.blur();
+        }
+      } else if (innerParams.focusCancel && isVisible(domCache.cancelButton)) {
+        domCache.cancelButton.focus();
+      } else if (innerParams.focusConfirm && isVisible(domCache.confirmButton)) {
+        domCache.confirmButton.focus();
+      } else {
+        setFocus(-1, 1);
+      }
+    }
+
+    // fix scroll
+    domCache.container.scrollTop = 0;
+  });
+}
+
+
+
+var instanceMethods = Object.freeze({
+	hideLoading: hideLoading,
+	disableLoading: hideLoading,
+	getInput: getInput,
+	enableButtons: enableButtons,
+	disableButtons: disableButtons,
+	enableConfirmButton: enableConfirmButton,
+	disableConfirmButton: disableConfirmButton,
+	enableInput: enableInput,
+	disableInput: disableInput,
+	showValidationError: showValidationError,
+	resetValidationError: resetValidationError,
+	_main: _main
+});
+
+var currentInstance = void 0;
+
+// SweetAlert constructor
+function SweetAlert() {
+  // Prevent run in Node env
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  // Check for the existence of Promise
+  if (typeof Promise === 'undefined') {
+    error('This package requires a Promise library, please include a shim to enable it in this browser (See: https://github.com/sweetalert2/sweetalert2/wiki/Migration-from-SweetAlert-to-SweetAlert2#1-ie-support)');
+  }
+
+  for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+    args[_key] = arguments[_key];
+  }
+
+  if (typeof args[0] === 'undefined') {
+    error('SweetAlert2 expects at least 1 attribute!');
+    return false;
+  }
+
+  currentInstance = this;
+
+  var outerParams = Object.freeze(this.constructor.argsToParams(args));
+
+  Object.defineProperties(this, {
+    params: {
+      value: outerParams,
+      writable: false,
+      enumerable: true
+    }
+  });
+
+  var promise = this._main(this.params);
+  privateProps.promise.set(this, promise);
+}
+
+// `catch` cannot be the name of a module export, so we define our thenable methods here instead
+SweetAlert.prototype.then = function (onFulfilled, onRejected) {
+  var promise = privateProps.promise.get(this);
+  return promise.then(onFulfilled, onRejected);
+};
+SweetAlert.prototype.catch = function (onRejected) {
+  var promise = privateProps.promise.get(this);
+  return promise.catch(onRejected);
+};
+SweetAlert.prototype.finally = function (onFinally) {
+  var promise = privateProps.promise.get(this);
+  return promise.finally(onFinally);
+};
+
+// Assign instance methods from src/instanceMethods/*.js to prototype
+_extends(SweetAlert.prototype, instanceMethods);
+
+// Assign static methods from src/staticMethods/*.js to constructor
+_extends(SweetAlert, staticMethods);
+
+// Proxy to instance methods to constructor, for now, for backwards compatibility
+Object.keys(instanceMethods).forEach(function (key) {
+  SweetAlert[key] = function () {
+    if (currentInstance) {
+      var _currentInstance;
+
+      return (_currentInstance = currentInstance)[key].apply(_currentInstance, arguments);
+    }
+  };
+});
+
+SweetAlert.DismissReason = DismissReason;
+
+SweetAlert.noop = function () {};
+
+SweetAlert.version = version;
+
+var Swal = withNoNewKeyword(withGlobalDefaults(SweetAlert));
+Swal.default = Swal;
+
+return Swal;
+
+})));
+if (typeof window !== 'undefined' && window.Sweetalert2){  window.swal = window.sweetAlert = window.Swal = window.SweetAlert = window.Sweetalert2}
+
+"undefined"!=typeof document&&function(e,t){var n=e.createElement("style");if(e.getElementsByTagName("head")[0].appendChild(n),n.styleSheet)n.styleSheet.disabled||(n.styleSheet.cssText=t);else try{n.innerHTML=t}catch(e){n.innerText=t}}(document,"@-webkit-keyframes swal2-show {\n" +
+"  0% {\n" +
+"    -webkit-transform: scale(0.7);\n" +
+"            transform: scale(0.7); }\n" +
+"  45% {\n" +
+"    -webkit-transform: scale(1.05);\n" +
+"            transform: scale(1.05); }\n" +
+"  80% {\n" +
+"    -webkit-transform: scale(0.95);\n" +
+"            transform: scale(0.95); }\n" +
+"  100% {\n" +
+"    -webkit-transform: scale(1);\n" +
+"            transform: scale(1); } }\n" +
+"\n" +
+"@keyframes swal2-show {\n" +
+"  0% {\n" +
+"    -webkit-transform: scale(0.7);\n" +
+"            transform: scale(0.7); }\n" +
+"  45% {\n" +
+"    -webkit-transform: scale(1.05);\n" +
+"            transform: scale(1.05); }\n" +
+"  80% {\n" +
+"    -webkit-transform: scale(0.95);\n" +
+"            transform: scale(0.95); }\n" +
+"  100% {\n" +
+"    -webkit-transform: scale(1);\n" +
+"            transform: scale(1); } }\n" +
+"\n" +
+"@-webkit-keyframes swal2-hide {\n" +
+"  0% {\n" +
+"    -webkit-transform: scale(1);\n" +
+"            transform: scale(1);\n" +
+"    opacity: 1; }\n" +
+"  100% {\n" +
+"    -webkit-transform: scale(0.5);\n" +
+"            transform: scale(0.5);\n" +
+"    opacity: 0; } }\n" +
+"\n" +
+"@keyframes swal2-hide {\n" +
+"  0% {\n" +
+"    -webkit-transform: scale(1);\n" +
+"            transform: scale(1);\n" +
+"    opacity: 1; }\n" +
+"  100% {\n" +
+"    -webkit-transform: scale(0.5);\n" +
+"            transform: scale(0.5);\n" +
+"    opacity: 0; } }\n" +
+"\n" +
+"@-webkit-keyframes swal2-animate-success-line-tip {\n" +
+"  0% {\n" +
+"    top: 1.1875em;\n" +
+"    left: .0625em;\n" +
+"    width: 0; }\n" +
+"  54% {\n" +
+"    top: 1.0625em;\n" +
+"    left: .125em;\n" +
+"    width: 0; }\n" +
+"  70% {\n" +
+"    top: 2.1875em;\n" +
+"    left: -.375em;\n" +
+"    width: 3.125em; }\n" +
+"  84% {\n" +
+"    top: 3em;\n" +
+"    left: 1.3125em;\n" +
+"    width: 1.0625em; }\n" +
+"  100% {\n" +
+"    top: 2.8125em;\n" +
+"    left: .875em;\n" +
+"    width: 1.5625em; } }\n" +
+"\n" +
+"@keyframes swal2-animate-success-line-tip {\n" +
+"  0% {\n" +
+"    top: 1.1875em;\n" +
+"    left: .0625em;\n" +
+"    width: 0; }\n" +
+"  54% {\n" +
+"    top: 1.0625em;\n" +
+"    left: .125em;\n" +
+"    width: 0; }\n" +
+"  70% {\n" +
+"    top: 2.1875em;\n" +
+"    left: -.375em;\n" +
+"    width: 3.125em; }\n" +
+"  84% {\n" +
+"    top: 3em;\n" +
+"    left: 1.3125em;\n" +
+"    width: 1.0625em; }\n" +
+"  100% {\n" +
+"    top: 2.8125em;\n" +
+"    left: .875em;\n" +
+"    width: 1.5625em; } }\n" +
+"\n" +
+"@-webkit-keyframes swal2-animate-success-line-long {\n" +
+"  0% {\n" +
+"    top: 3.375em;\n" +
+"    right: 2.875em;\n" +
+"    width: 0; }\n" +
+"  65% {\n" +
+"    top: 3.375em;\n" +
+"    right: 2.875em;\n" +
+"    width: 0; }\n" +
+"  84% {\n" +
+"    top: 2.1875em;\n" +
+"    right: 0;\n" +
+"    width: 3.4375em; }\n" +
+"  100% {\n" +
+"    top: 2.375em;\n" +
+"    right: .5em;\n" +
+"    width: 2.9375em; } }\n" +
+"\n" +
+"@keyframes swal2-animate-success-line-long {\n" +
+"  0% {\n" +
+"    top: 3.375em;\n" +
+"    right: 2.875em;\n" +
+"    width: 0; }\n" +
+"  65% {\n" +
+"    top: 3.375em;\n" +
+"    right: 2.875em;\n" +
+"    width: 0; }\n" +
+"  84% {\n" +
+"    top: 2.1875em;\n" +
+"    right: 0;\n" +
+"    width: 3.4375em; }\n" +
+"  100% {\n" +
+"    top: 2.375em;\n" +
+"    right: .5em;\n" +
+"    width: 2.9375em; } }\n" +
+"\n" +
+"@-webkit-keyframes swal2-rotate-success-circular-line {\n" +
+"  0% {\n" +
+"    -webkit-transform: rotate(-45deg);\n" +
+"            transform: rotate(-45deg); }\n" +
+"  5% {\n" +
+"    -webkit-transform: rotate(-45deg);\n" +
+"            transform: rotate(-45deg); }\n" +
+"  12% {\n" +
+"    -webkit-transform: rotate(-405deg);\n" +
+"            transform: rotate(-405deg); }\n" +
+"  100% {\n" +
+"    -webkit-transform: rotate(-405deg);\n" +
+"            transform: rotate(-405deg); } }\n" +
+"\n" +
+"@keyframes swal2-rotate-success-circular-line {\n" +
+"  0% {\n" +
+"    -webkit-transform: rotate(-45deg);\n" +
+"            transform: rotate(-45deg); }\n" +
+"  5% {\n" +
+"    -webkit-transform: rotate(-45deg);\n" +
+"            transform: rotate(-45deg); }\n" +
+"  12% {\n" +
+"    -webkit-transform: rotate(-405deg);\n" +
+"            transform: rotate(-405deg); }\n" +
+"  100% {\n" +
+"    -webkit-transform: rotate(-405deg);\n" +
+"            transform: rotate(-405deg); } }\n" +
+"\n" +
+"@-webkit-keyframes swal2-animate-error-x-mark {\n" +
+"  0% {\n" +
+"    margin-top: 1.625em;\n" +
+"    -webkit-transform: scale(0.4);\n" +
+"            transform: scale(0.4);\n" +
+"    opacity: 0; }\n" +
+"  50% {\n" +
+"    margin-top: 1.625em;\n" +
+"    -webkit-transform: scale(0.4);\n" +
+"            transform: scale(0.4);\n" +
+"    opacity: 0; }\n" +
+"  80% {\n" +
+"    margin-top: -.375em;\n" +
+"    -webkit-transform: scale(1.15);\n" +
+"            transform: scale(1.15); }\n" +
+"  100% {\n" +
+"    margin-top: 0;\n" +
+"    -webkit-transform: scale(1);\n" +
+"            transform: scale(1);\n" +
+"    opacity: 1; } }\n" +
+"\n" +
+"@keyframes swal2-animate-error-x-mark {\n" +
+"  0% {\n" +
+"    margin-top: 1.625em;\n" +
+"    -webkit-transform: scale(0.4);\n" +
+"            transform: scale(0.4);\n" +
+"    opacity: 0; }\n" +
+"  50% {\n" +
+"    margin-top: 1.625em;\n" +
+"    -webkit-transform: scale(0.4);\n" +
+"            transform: scale(0.4);\n" +
+"    opacity: 0; }\n" +
+"  80% {\n" +
+"    margin-top: -.375em;\n" +
+"    -webkit-transform: scale(1.15);\n" +
+"            transform: scale(1.15); }\n" +
+"  100% {\n" +
+"    margin-top: 0;\n" +
+"    -webkit-transform: scale(1);\n" +
+"            transform: scale(1);\n" +
+"    opacity: 1; } }\n" +
+"\n" +
+"@-webkit-keyframes swal2-animate-error-icon {\n" +
+"  0% {\n" +
+"    -webkit-transform: rotateX(100deg);\n" +
+"            transform: rotateX(100deg);\n" +
+"    opacity: 0; }\n" +
+"  100% {\n" +
+"    -webkit-transform: rotateX(0deg);\n" +
+"            transform: rotateX(0deg);\n" +
+"    opacity: 1; } }\n" +
+"\n" +
+"@keyframes swal2-animate-error-icon {\n" +
+"  0% {\n" +
+"    -webkit-transform: rotateX(100deg);\n" +
+"            transform: rotateX(100deg);\n" +
+"    opacity: 0; }\n" +
+"  100% {\n" +
+"    -webkit-transform: rotateX(0deg);\n" +
+"            transform: rotateX(0deg);\n" +
+"    opacity: 1; } }\n" +
+"\n" +
+"body.swal2-toast-shown.swal2-has-input > .swal2-container > .swal2-toast {\n" +
+"  flex-direction: column;\n" +
+"  align-items: stretch; }\n" +
+"  body.swal2-toast-shown.swal2-has-input > .swal2-container > .swal2-toast .swal2-actions {\n" +
+"    flex: 1;\n" +
+"    align-self: stretch;\n" +
+"    justify-content: flex-end;\n" +
+"    height: 2.2em; }\n" +
+"  body.swal2-toast-shown.swal2-has-input > .swal2-container > .swal2-toast .swal2-loading {\n" +
+"    justify-content: center; }\n" +
+"  body.swal2-toast-shown.swal2-has-input > .swal2-container > .swal2-toast .swal2-input {\n" +
+"    height: 2em;\n" +
+"    margin: .3125em auto;\n" +
+"    font-size: 1em; }\n" +
+"  body.swal2-toast-shown.swal2-has-input > .swal2-container > .swal2-toast .swal2-validationerror {\n" +
+"    font-size: 1em; }\n" +
+"\n" +
+"body.swal2-toast-shown > .swal2-container {\n" +
+"  position: fixed;\n" +
+"  background-color: transparent; }\n" +
+"  body.swal2-toast-shown > .swal2-container.swal2-shown {\n" +
+"    background-color: transparent; }\n" +
+"  body.swal2-toast-shown > .swal2-container.swal2-top {\n" +
+"    top: 0;\n" +
+"    right: auto;\n" +
+"    bottom: auto;\n" +
+"    left: 50%;\n" +
+"    -webkit-transform: translateX(-50%);\n" +
+"            transform: translateX(-50%); }\n" +
+"  body.swal2-toast-shown > .swal2-container.swal2-top-end, body.swal2-toast-shown > .swal2-container.swal2-top-right {\n" +
+"    top: 0;\n" +
+"    right: 0;\n" +
+"    bottom: auto;\n" +
+"    left: auto; }\n" +
+"  body.swal2-toast-shown > .swal2-container.swal2-top-start, body.swal2-toast-shown > .swal2-container.swal2-top-left {\n" +
+"    top: 0;\n" +
+"    right: auto;\n" +
+"    bottom: auto;\n" +
+"    left: 0; }\n" +
+"  body.swal2-toast-shown > .swal2-container.swal2-center-start, body.swal2-toast-shown > .swal2-container.swal2-center-left {\n" +
+"    top: 50%;\n" +
+"    right: auto;\n" +
+"    bottom: auto;\n" +
+"    left: 0;\n" +
+"    -webkit-transform: translateY(-50%);\n" +
+"            transform: translateY(-50%); }\n" +
+"  body.swal2-toast-shown > .swal2-container.swal2-center {\n" +
+"    top: 50%;\n" +
+"    right: auto;\n" +
+"    bottom: auto;\n" +
+"    left: 50%;\n" +
+"    -webkit-transform: translate(-50%, -50%);\n" +
+"            transform: translate(-50%, -50%); }\n" +
+"  body.swal2-toast-shown > .swal2-container.swal2-center-end, body.swal2-toast-shown > .swal2-container.swal2-center-right {\n" +
+"    top: 50%;\n" +
+"    right: 0;\n" +
+"    bottom: auto;\n" +
+"    left: auto;\n" +
+"    -webkit-transform: translateY(-50%);\n" +
+"            transform: translateY(-50%); }\n" +
+"  body.swal2-toast-shown > .swal2-container.swal2-bottom-start, body.swal2-toast-shown > .swal2-container.swal2-bottom-left {\n" +
+"    top: auto;\n" +
+"    right: auto;\n" +
+"    bottom: 0;\n" +
+"    left: 0; }\n" +
+"  body.swal2-toast-shown > .swal2-container.swal2-bottom {\n" +
+"    top: auto;\n" +
+"    right: auto;\n" +
+"    bottom: 0;\n" +
+"    left: 50%;\n" +
+"    -webkit-transform: translateX(-50%);\n" +
+"            transform: translateX(-50%); }\n" +
+"  body.swal2-toast-shown > .swal2-container.swal2-bottom-end, body.swal2-toast-shown > .swal2-container.swal2-bottom-right {\n" +
+"    top: auto;\n" +
+"    right: 0;\n" +
+"    bottom: 0;\n" +
+"    left: auto; }\n" +
+"\n" +
+".swal2-popup.swal2-toast {\n" +
+"  flex-direction: row;\n" +
+"  align-items: center;\n" +
+"  width: auto;\n" +
+"  padding: 0.625em;\n" +
+"  box-shadow: 0 0 0.625em #d9d9d9;\n" +
+"  overflow-y: hidden; }\n" +
+"  .swal2-popup.swal2-toast .swal2-header {\n" +
+"    flex-direction: row; }\n" +
+"  .swal2-popup.swal2-toast .swal2-title {\n" +
+"    justify-content: flex-start;\n" +
+"    margin: 0 .6em;\n" +
+"    font-size: 1em; }\n" +
+"  .swal2-popup.swal2-toast .swal2-close {\n" +
+"    position: initial; }\n" +
+"  .swal2-popup.swal2-toast .swal2-content {\n" +
+"    justify-content: flex-start;\n" +
+"    font-size: 1em; }\n" +
+"  .swal2-popup.swal2-toast .swal2-icon {\n" +
+"    width: 2em;\n" +
+"    min-width: 2em;\n" +
+"    height: 2em;\n" +
+"    margin: 0; }\n" +
+"    .swal2-popup.swal2-toast .swal2-icon-text {\n" +
+"      font-size: 2em;\n" +
+"      font-weight: bold;\n" +
+"      line-height: 1em; }\n" +
+"    .swal2-popup.swal2-toast .swal2-icon.swal2-success .swal2-success-ring {\n" +
+"      width: 2em;\n" +
+"      height: 2em; }\n" +
+"    .swal2-popup.swal2-toast .swal2-icon.swal2-error [class^='swal2-x-mark-line'] {\n" +
+"      top: .875em;\n" +
+"      width: 1.375em; }\n" +
+"      .swal2-popup.swal2-toast .swal2-icon.swal2-error [class^='swal2-x-mark-line'][class$='left'] {\n" +
+"        left: .3125em; }\n" +
+"      .swal2-popup.swal2-toast .swal2-icon.swal2-error [class^='swal2-x-mark-line'][class$='right'] {\n" +
+"        right: .3125em; }\n" +
+"  .swal2-popup.swal2-toast .swal2-actions {\n" +
+"    height: auto;\n" +
+"    margin: 0 .3125em; }\n" +
+"  .swal2-popup.swal2-toast .swal2-styled {\n" +
+"    margin: 0 .3125em;\n" +
+"    padding: .3125em .625em;\n" +
+"    font-size: 1em; }\n" +
+"    .swal2-popup.swal2-toast .swal2-styled:focus {\n" +
+"      box-shadow: 0 0 0 0.0625em #fff, 0 0 0 0.125em rgba(50, 100, 150, 0.4); }\n" +
+"  .swal2-popup.swal2-toast .swal2-success {\n" +
+"    border-color: #a5dc86; }\n" +
+"    .swal2-popup.swal2-toast .swal2-success [class^='swal2-success-circular-line'] {\n" +
+"      position: absolute;\n" +
+"      width: 2em;\n" +
+"      height: 2.8125em;\n" +
+"      -webkit-transform: rotate(45deg);\n" +
+"              transform: rotate(45deg);\n" +
+"      border-radius: 50%; }\n" +
+"      .swal2-popup.swal2-toast .swal2-success [class^='swal2-success-circular-line'][class$='left'] {\n" +
+"        top: -.25em;\n" +
+"        left: -.9375em;\n" +
+"        -webkit-transform: rotate(-45deg);\n" +
+"                transform: rotate(-45deg);\n" +
+"        -webkit-transform-origin: 2em 2em;\n" +
+"                transform-origin: 2em 2em;\n" +
+"        border-radius: 4em 0 0 4em; }\n" +
+"      .swal2-popup.swal2-toast .swal2-success [class^='swal2-success-circular-line'][class$='right'] {\n" +
+"        top: -.25em;\n" +
+"        left: .9375em;\n" +
+"        -webkit-transform-origin: 0 2em;\n" +
+"                transform-origin: 0 2em;\n" +
+"        border-radius: 0 4em 4em 0; }\n" +
+"    .swal2-popup.swal2-toast .swal2-success .swal2-success-ring {\n" +
+"      width: 2em;\n" +
+"      height: 2em; }\n" +
+"    .swal2-popup.swal2-toast .swal2-success .swal2-success-fix {\n" +
+"      top: 0;\n" +
+"      left: .4375em;\n" +
+"      width: .4375em;\n" +
+"      height: 2.6875em; }\n" +
+"    .swal2-popup.swal2-toast .swal2-success [class^='swal2-success-line'] {\n" +
+"      height: .3125em; }\n" +
+"      .swal2-popup.swal2-toast .swal2-success [class^='swal2-success-line'][class$='tip'] {\n" +
+"        top: 1.125em;\n" +
+"        left: .1875em;\n" +
+"        width: .75em; }\n" +
+"      .swal2-popup.swal2-toast .swal2-success [class^='swal2-success-line'][class$='long'] {\n" +
+"        top: .9375em;\n" +
+"        right: .1875em;\n" +
+"        width: 1.375em; }\n" +
+"  .swal2-popup.swal2-toast.swal2-show {\n" +
+"    -webkit-animation: showSweetToast .5s;\n" +
+"            animation: showSweetToast .5s; }\n" +
+"  .swal2-popup.swal2-toast.swal2-hide {\n" +
+"    -webkit-animation: hideSweetToast .2s forwards;\n" +
+"            animation: hideSweetToast .2s forwards; }\n" +
+"  .swal2-popup.swal2-toast .swal2-animate-success-icon .swal2-success-line-tip {\n" +
+"    -webkit-animation: animate-toast-success-tip .75s;\n" +
+"            animation: animate-toast-success-tip .75s; }\n" +
+"  .swal2-popup.swal2-toast .swal2-animate-success-icon .swal2-success-line-long {\n" +
+"    -webkit-animation: animate-toast-success-long .75s;\n" +
+"            animation: animate-toast-success-long .75s; }\n" +
+"\n" +
+"@-webkit-keyframes showSweetToast {\n" +
+"  0% {\n" +
+"    -webkit-transform: translateY(-0.625em) rotateZ(2deg);\n" +
+"            transform: translateY(-0.625em) rotateZ(2deg);\n" +
+"    opacity: 0; }\n" +
+"  33% {\n" +
+"    -webkit-transform: translateY(0) rotateZ(-2deg);\n" +
+"            transform: translateY(0) rotateZ(-2deg);\n" +
+"    opacity: .5; }\n" +
+"  66% {\n" +
+"    -webkit-transform: translateY(0.3125em) rotateZ(2deg);\n" +
+"            transform: translateY(0.3125em) rotateZ(2deg);\n" +
+"    opacity: .7; }\n" +
+"  100% {\n" +
+"    -webkit-transform: translateY(0) rotateZ(0);\n" +
+"            transform: translateY(0) rotateZ(0);\n" +
+"    opacity: 1; } }\n" +
+"\n" +
+"@keyframes showSweetToast {\n" +
+"  0% {\n" +
+"    -webkit-transform: translateY(-0.625em) rotateZ(2deg);\n" +
+"            transform: translateY(-0.625em) rotateZ(2deg);\n" +
+"    opacity: 0; }\n" +
+"  33% {\n" +
+"    -webkit-transform: translateY(0) rotateZ(-2deg);\n" +
+"            transform: translateY(0) rotateZ(-2deg);\n" +
+"    opacity: .5; }\n" +
+"  66% {\n" +
+"    -webkit-transform: translateY(0.3125em) rotateZ(2deg);\n" +
+"            transform: translateY(0.3125em) rotateZ(2deg);\n" +
+"    opacity: .7; }\n" +
+"  100% {\n" +
+"    -webkit-transform: translateY(0) rotateZ(0);\n" +
+"            transform: translateY(0) rotateZ(0);\n" +
+"    opacity: 1; } }\n" +
+"\n" +
+"@-webkit-keyframes hideSweetToast {\n" +
+"  0% {\n" +
+"    opacity: 1; }\n" +
+"  33% {\n" +
+"    opacity: .5; }\n" +
+"  100% {\n" +
+"    -webkit-transform: rotateZ(1deg);\n" +
+"            transform: rotateZ(1deg);\n" +
+"    opacity: 0; } }\n" +
+"\n" +
+"@keyframes hideSweetToast {\n" +
+"  0% {\n" +
+"    opacity: 1; }\n" +
+"  33% {\n" +
+"    opacity: .5; }\n" +
+"  100% {\n" +
+"    -webkit-transform: rotateZ(1deg);\n" +
+"            transform: rotateZ(1deg);\n" +
+"    opacity: 0; } }\n" +
+"\n" +
+"@-webkit-keyframes animate-toast-success-tip {\n" +
+"  0% {\n" +
+"    top: .5625em;\n" +
+"    left: .0625em;\n" +
+"    width: 0; }\n" +
+"  54% {\n" +
+"    top: .125em;\n" +
+"    left: .125em;\n" +
+"    width: 0; }\n" +
+"  70% {\n" +
+"    top: .625em;\n" +
+"    left: -.25em;\n" +
+"    width: 1.625em; }\n" +
+"  84% {\n" +
+"    top: 1.0625em;\n" +
+"    left: .75em;\n" +
+"    width: .5em; }\n" +
+"  100% {\n" +
+"    top: 1.125em;\n" +
+"    left: .1875em;\n" +
+"    width: .75em; } }\n" +
+"\n" +
+"@keyframes animate-toast-success-tip {\n" +
+"  0% {\n" +
+"    top: .5625em;\n" +
+"    left: .0625em;\n" +
+"    width: 0; }\n" +
+"  54% {\n" +
+"    top: .125em;\n" +
+"    left: .125em;\n" +
+"    width: 0; }\n" +
+"  70% {\n" +
+"    top: .625em;\n" +
+"    left: -.25em;\n" +
+"    width: 1.625em; }\n" +
+"  84% {\n" +
+"    top: 1.0625em;\n" +
+"    left: .75em;\n" +
+"    width: .5em; }\n" +
+"  100% {\n" +
+"    top: 1.125em;\n" +
+"    left: .1875em;\n" +
+"    width: .75em; } }\n" +
+"\n" +
+"@-webkit-keyframes animate-toast-success-long {\n" +
+"  0% {\n" +
+"    top: 1.625em;\n" +
+"    right: 1.375em;\n" +
+"    width: 0; }\n" +
+"  65% {\n" +
+"    top: 1.25em;\n" +
+"    right: .9375em;\n" +
+"    width: 0; }\n" +
+"  84% {\n" +
+"    top: .9375em;\n" +
+"    right: 0;\n" +
+"    width: 1.125em; }\n" +
+"  100% {\n" +
+"    top: .9375em;\n" +
+"    right: .1875em;\n" +
+"    width: 1.375em; } }\n" +
+"\n" +
+"@keyframes animate-toast-success-long {\n" +
+"  0% {\n" +
+"    top: 1.625em;\n" +
+"    right: 1.375em;\n" +
+"    width: 0; }\n" +
+"  65% {\n" +
+"    top: 1.25em;\n" +
+"    right: .9375em;\n" +
+"    width: 0; }\n" +
+"  84% {\n" +
+"    top: .9375em;\n" +
+"    right: 0;\n" +
+"    width: 1.125em; }\n" +
+"  100% {\n" +
+"    top: .9375em;\n" +
+"    right: .1875em;\n" +
+"    width: 1.375em; } }\n" +
+"\n" +
+"body.swal2-shown:not(.swal2-no-backdrop):not(.swal2-toast-shown) {\n" +
+"  overflow-y: hidden; }\n" +
+"\n" +
+"body.swal2-height-auto {\n" +
+"  height: auto !important; }\n" +
+"\n" +
+"body.swal2-no-backdrop .swal2-shown {\n" +
+"  top: auto;\n" +
+"  right: auto;\n" +
+"  bottom: auto;\n" +
+"  left: auto;\n" +
+"  background-color: transparent; }\n" +
+"  body.swal2-no-backdrop .swal2-shown > .swal2-modal {\n" +
+"    box-shadow: 0 0 10px rgba(0, 0, 0, 0.4); }\n" +
+"  body.swal2-no-backdrop .swal2-shown.swal2-top {\n" +
+"    top: 0;\n" +
+"    left: 50%;\n" +
+"    -webkit-transform: translateX(-50%);\n" +
+"            transform: translateX(-50%); }\n" +
+"  body.swal2-no-backdrop .swal2-shown.swal2-top-start, body.swal2-no-backdrop .swal2-shown.swal2-top-left {\n" +
+"    top: 0;\n" +
+"    left: 0; }\n" +
+"  body.swal2-no-backdrop .swal2-shown.swal2-top-end, body.swal2-no-backdrop .swal2-shown.swal2-top-right {\n" +
+"    top: 0;\n" +
+"    right: 0; }\n" +
+"  body.swal2-no-backdrop .swal2-shown.swal2-center {\n" +
+"    top: 50%;\n" +
+"    left: 50%;\n" +
+"    -webkit-transform: translate(-50%, -50%);\n" +
+"            transform: translate(-50%, -50%); }\n" +
+"  body.swal2-no-backdrop .swal2-shown.swal2-center-start, body.swal2-no-backdrop .swal2-shown.swal2-center-left {\n" +
+"    top: 50%;\n" +
+"    left: 0;\n" +
+"    -webkit-transform: translateY(-50%);\n" +
+"            transform: translateY(-50%); }\n" +
+"  body.swal2-no-backdrop .swal2-shown.swal2-center-end, body.swal2-no-backdrop .swal2-shown.swal2-center-right {\n" +
+"    top: 50%;\n" +
+"    right: 0;\n" +
+"    -webkit-transform: translateY(-50%);\n" +
+"            transform: translateY(-50%); }\n" +
+"  body.swal2-no-backdrop .swal2-shown.swal2-bottom {\n" +
+"    bottom: 0;\n" +
+"    left: 50%;\n" +
+"    -webkit-transform: translateX(-50%);\n" +
+"            transform: translateX(-50%); }\n" +
+"  body.swal2-no-backdrop .swal2-shown.swal2-bottom-start, body.swal2-no-backdrop .swal2-shown.swal2-bottom-left {\n" +
+"    bottom: 0;\n" +
+"    left: 0; }\n" +
+"  body.swal2-no-backdrop .swal2-shown.swal2-bottom-end, body.swal2-no-backdrop .swal2-shown.swal2-bottom-right {\n" +
+"    right: 0;\n" +
+"    bottom: 0; }\n" +
+"\n" +
+".swal2-container {\n" +
+"  display: flex;\n" +
+"  position: fixed;\n" +
+"  top: 0;\n" +
+"  right: 0;\n" +
+"  bottom: 0;\n" +
+"  left: 0;\n" +
+"  flex-direction: row;\n" +
+"  align-items: center;\n" +
+"  justify-content: center;\n" +
+"  padding: 10px;\n" +
+"  background-color: transparent;\n" +
+"  z-index: 1060;\n" +
+"  overflow-x: hidden;\n" +
+"  -webkit-overflow-scrolling: touch; }\n" +
+"  .swal2-container.swal2-top {\n" +
+"    align-items: flex-start; }\n" +
+"  .swal2-container.swal2-top-start, .swal2-container.swal2-top-left {\n" +
+"    align-items: flex-start;\n" +
+"    justify-content: flex-start; }\n" +
+"  .swal2-container.swal2-top-end, .swal2-container.swal2-top-right {\n" +
+"    align-items: flex-start;\n" +
+"    justify-content: flex-end; }\n" +
+"  .swal2-container.swal2-center {\n" +
+"    align-items: center; }\n" +
+"  .swal2-container.swal2-center-start, .swal2-container.swal2-center-left {\n" +
+"    align-items: center;\n" +
+"    justify-content: flex-start; }\n" +
+"  .swal2-container.swal2-center-end, .swal2-container.swal2-center-right {\n" +
+"    align-items: center;\n" +
+"    justify-content: flex-end; }\n" +
+"  .swal2-container.swal2-bottom {\n" +
+"    align-items: flex-end; }\n" +
+"  .swal2-container.swal2-bottom-start, .swal2-container.swal2-bottom-left {\n" +
+"    align-items: flex-end;\n" +
+"    justify-content: flex-start; }\n" +
+"  .swal2-container.swal2-bottom-end, .swal2-container.swal2-bottom-right {\n" +
+"    align-items: flex-end;\n" +
+"    justify-content: flex-end; }\n" +
+"  .swal2-container.swal2-grow-fullscreen > .swal2-modal {\n" +
+"    display: flex !important;\n" +
+"    flex: 1;\n" +
+"    align-self: stretch;\n" +
+"    justify-content: center; }\n" +
+"  .swal2-container.swal2-grow-row > .swal2-modal {\n" +
+"    display: flex !important;\n" +
+"    flex: 1;\n" +
+"    align-content: center;\n" +
+"    justify-content: center; }\n" +
+"  .swal2-container.swal2-grow-column {\n" +
+"    flex: 1;\n" +
+"    flex-direction: column; }\n" +
+"    .swal2-container.swal2-grow-column.swal2-top, .swal2-container.swal2-grow-column.swal2-center, .swal2-container.swal2-grow-column.swal2-bottom {\n" +
+"      align-items: center; }\n" +
+"    .swal2-container.swal2-grow-column.swal2-top-start, .swal2-container.swal2-grow-column.swal2-center-start, .swal2-container.swal2-grow-column.swal2-bottom-start, .swal2-container.swal2-grow-column.swal2-top-left, .swal2-container.swal2-grow-column.swal2-center-left, .swal2-container.swal2-grow-column.swal2-bottom-left {\n" +
+"      align-items: flex-start; }\n" +
+"    .swal2-container.swal2-grow-column.swal2-top-end, .swal2-container.swal2-grow-column.swal2-center-end, .swal2-container.swal2-grow-column.swal2-bottom-end, .swal2-container.swal2-grow-column.swal2-top-right, .swal2-container.swal2-grow-column.swal2-center-right, .swal2-container.swal2-grow-column.swal2-bottom-right {\n" +
+"      align-items: flex-end; }\n" +
+"    .swal2-container.swal2-grow-column > .swal2-modal {\n" +
+"      display: flex !important;\n" +
+"      flex: 1;\n" +
+"      align-content: center;\n" +
+"      justify-content: center; }\n" +
+"  .swal2-container:not(.swal2-top):not(.swal2-top-start):not(.swal2-top-end):not(.swal2-top-left):not(.swal2-top-right):not(.swal2-center-start):not(.swal2-center-end):not(.swal2-center-left):not(.swal2-center-right):not(.swal2-bottom):not(.swal2-bottom-start):not(.swal2-bottom-end):not(.swal2-bottom-left):not(.swal2-bottom-right) > .swal2-modal {\n" +
+"    margin: auto; }\n" +
+"  @media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {\n" +
+"    .swal2-container .swal2-modal {\n" +
+"      margin: 0 !important; } }\n" +
+"  .swal2-container.swal2-fade {\n" +
+"    transition: background-color .1s; }\n" +
+"  .swal2-container.swal2-shown {\n" +
+"    background-color: rgba(0, 0, 0, 0.4); }\n" +
+"\n" +
+".swal2-popup {\n" +
+"  display: none;\n" +
+"  position: relative;\n" +
+"  flex-direction: column;\n" +
+"  justify-content: center;\n" +
+"  width: 32em;\n" +
+"  max-width: 100%;\n" +
+"  padding: 1.25em;\n" +
+"  border-radius: 0.3125em;\n" +
+"  background: #fff;\n" +
+"  font-family: inherit;\n" +
+"  font-size: 1rem;\n" +
+"  box-sizing: border-box; }\n" +
+"  .swal2-popup:focus {\n" +
+"    outline: none; }\n" +
+"  .swal2-popup.swal2-loading {\n" +
+"    overflow-y: hidden; }\n" +
+"  .swal2-popup .swal2-header {\n" +
+"    display: flex;\n" +
+"    flex-direction: column;\n" +
+"    align-items: center; }\n" +
+"  .swal2-popup .swal2-title {\n" +
+"    display: block;\n" +
+"    position: relative;\n" +
+"    max-width: 100%;\n" +
+"    margin: 0 0 0.4em;\n" +
+"    padding: 0;\n" +
+"    color: #595959;\n" +
+"    font-size: 1.875em;\n" +
+"    font-weight: 600;\n" +
+"    text-align: center;\n" +
+"    text-transform: none;\n" +
+"    word-wrap: break-word; }\n" +
+"  .swal2-popup .swal2-actions {\n" +
+"    align-items: center;\n" +
+"    justify-content: center;\n" +
+"    margin: 1.25em auto 0; }\n" +
+"    .swal2-popup .swal2-actions:not(.swal2-loading) .swal2-styled[disabled] {\n" +
+"      opacity: .4; }\n" +
+"    .swal2-popup .swal2-actions:not(.swal2-loading) .swal2-styled:hover {\n" +
+"      background-image: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1)); }\n" +
+"    .swal2-popup .swal2-actions:not(.swal2-loading) .swal2-styled:active {\n" +
+"      background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)); }\n" +
+"    .swal2-popup .swal2-actions.swal2-loading .swal2-styled.swal2-confirm {\n" +
+"      width: 2.5em;\n" +
+"      height: 2.5em;\n" +
+"      margin: .46875em;\n" +
+"      padding: 0;\n" +
+"      border: .25em solid transparent;\n" +
+"      border-radius: 100%;\n" +
+"      border-color: transparent;\n" +
+"      background-color: transparent !important;\n" +
+"      color: transparent;\n" +
+"      cursor: default;\n" +
+"      box-sizing: border-box;\n" +
+"      -webkit-animation: swal2-rotate-loading 1.5s linear 0s infinite normal;\n" +
+"              animation: swal2-rotate-loading 1.5s linear 0s infinite normal;\n" +
+"      -webkit-user-select: none;\n" +
+"         -moz-user-select: none;\n" +
+"          -ms-user-select: none;\n" +
+"              user-select: none; }\n" +
+"    .swal2-popup .swal2-actions.swal2-loading .swal2-styled.swal2-cancel {\n" +
+"      margin-right: 30px;\n" +
+"      margin-left: 30px; }\n" +
+"    .swal2-popup .swal2-actions.swal2-loading :not(.swal2-styled).swal2-confirm::after {\n" +
+"      display: inline-block;\n" +
+"      width: 15px;\n" +
+"      height: 15px;\n" +
+"      margin-left: 5px;\n" +
+"      border: 3px solid #999999;\n" +
+"      border-radius: 50%;\n" +
+"      border-right-color: transparent;\n" +
+"      box-shadow: 1px 1px 1px #fff;\n" +
+"      content: '';\n" +
+"      -webkit-animation: swal2-rotate-loading 1.5s linear 0s infinite normal;\n" +
+"              animation: swal2-rotate-loading 1.5s linear 0s infinite normal; }\n" +
+"  .swal2-popup .swal2-styled {\n" +
+"    margin: 0 .3125em;\n" +
+"    padding: .625em 2em;\n" +
+"    font-weight: 500;\n" +
+"    box-shadow: none; }\n" +
+"    .swal2-popup .swal2-styled:not([disabled]) {\n" +
+"      cursor: pointer; }\n" +
+"    .swal2-popup .swal2-styled.swal2-confirm {\n" +
+"      border: 0;\n" +
+"      border-radius: 0.25em;\n" +
+"      background: initial;\n" +
+"      background-color: #3085d6;\n" +
+"      color: #fff;\n" +
+"      font-size: 1.0625em; }\n" +
+"    .swal2-popup .swal2-styled.swal2-cancel {\n" +
+"      border: 0;\n" +
+"      border-radius: 0.25em;\n" +
+"      background: initial;\n" +
+"      background-color: #aaa;\n" +
+"      color: #fff;\n" +
+"      font-size: 1.0625em; }\n" +
+"    .swal2-popup .swal2-styled:focus {\n" +
+"      outline: none;\n" +
+"      box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgba(50, 100, 150, 0.4); }\n" +
+"    .swal2-popup .swal2-styled::-moz-focus-inner {\n" +
+"      border: 0; }\n" +
+"  .swal2-popup .swal2-footer {\n" +
+"    justify-content: center;\n" +
+"    margin: 1.25em 0 0;\n" +
+"    padding-top: 1em;\n" +
+"    border-top: 1px solid #eee;\n" +
+"    color: #545454;\n" +
+"    font-size: 1em; }\n" +
+"  .swal2-popup .swal2-image {\n" +
+"    max-width: 100%;\n" +
+"    margin: 1.25em auto; }\n" +
+"  .swal2-popup .swal2-close {\n" +
+"    position: absolute;\n" +
+"    top: 0;\n" +
+"    right: 0;\n" +
+"    justify-content: center;\n" +
+"    width: 1.2em;\n" +
+"    height: 1.2em;\n" +
+"    padding: 0;\n" +
+"    transition: color 0.1s ease-out;\n" +
+"    border: none;\n" +
+"    border-radius: 0;\n" +
+"    background: transparent;\n" +
+"    color: #cccccc;\n" +
+"    font-family: serif;\n" +
+"    font-size: 2.5em;\n" +
+"    line-height: 1.2;\n" +
+"    cursor: pointer;\n" +
+"    overflow: hidden; }\n" +
+"    .swal2-popup .swal2-close:hover {\n" +
+"      -webkit-transform: none;\n" +
+"              transform: none;\n" +
+"      color: #f27474; }\n" +
+"  .swal2-popup > .swal2-input,\n" +
+"  .swal2-popup > .swal2-file,\n" +
+"  .swal2-popup > .swal2-textarea,\n" +
+"  .swal2-popup > .swal2-select,\n" +
+"  .swal2-popup > .swal2-radio,\n" +
+"  .swal2-popup > .swal2-checkbox {\n" +
+"    display: none; }\n" +
+"  .swal2-popup .swal2-content {\n" +
+"    justify-content: center;\n" +
+"    margin: 0;\n" +
+"    padding: 0;\n" +
+"    color: #545454;\n" +
+"    font-size: 1.125em;\n" +
+"    font-weight: 300;\n" +
+"    line-height: normal;\n" +
+"    word-wrap: break-word; }\n" +
+"  .swal2-popup #swal2-content {\n" +
+"    text-align: center; }\n" +
+"  .swal2-popup .swal2-input,\n" +
+"  .swal2-popup .swal2-file,\n" +
+"  .swal2-popup .swal2-textarea,\n" +
+"  .swal2-popup .swal2-select,\n" +
+"  .swal2-popup .swal2-radio,\n" +
+"  .swal2-popup .swal2-checkbox {\n" +
+"    margin: 1em auto; }\n" +
+"  .swal2-popup .swal2-input,\n" +
+"  .swal2-popup .swal2-file,\n" +
+"  .swal2-popup .swal2-textarea {\n" +
+"    width: 100%;\n" +
+"    transition: border-color .3s, box-shadow .3s;\n" +
+"    border: 1px solid #d9d9d9;\n" +
+"    border-radius: 0.1875em;\n" +
+"    font-size: 1.125em;\n" +
+"    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.06);\n" +
+"    box-sizing: border-box; }\n" +
+"    .swal2-popup .swal2-input.swal2-inputerror,\n" +
+"    .swal2-popup .swal2-file.swal2-inputerror,\n" +
+"    .swal2-popup .swal2-textarea.swal2-inputerror {\n" +
+"      border-color: #f27474 !important;\n" +
+"      box-shadow: 0 0 2px #f27474 !important; }\n" +
+"    .swal2-popup .swal2-input:focus,\n" +
+"    .swal2-popup .swal2-file:focus,\n" +
+"    .swal2-popup .swal2-textarea:focus {\n" +
+"      border: 1px solid #b4dbed;\n" +
+"      outline: none;\n" +
+"      box-shadow: 0 0 3px #c4e6f5; }\n" +
+"    .swal2-popup .swal2-input::-webkit-input-placeholder,\n" +
+"    .swal2-popup .swal2-file::-webkit-input-placeholder,\n" +
+"    .swal2-popup .swal2-textarea::-webkit-input-placeholder {\n" +
+"      color: #cccccc; }\n" +
+"    .swal2-popup .swal2-input:-ms-input-placeholder,\n" +
+"    .swal2-popup .swal2-file:-ms-input-placeholder,\n" +
+"    .swal2-popup .swal2-textarea:-ms-input-placeholder {\n" +
+"      color: #cccccc; }\n" +
+"    .swal2-popup .swal2-input::-ms-input-placeholder,\n" +
+"    .swal2-popup .swal2-file::-ms-input-placeholder,\n" +
+"    .swal2-popup .swal2-textarea::-ms-input-placeholder {\n" +
+"      color: #cccccc; }\n" +
+"    .swal2-popup .swal2-input::placeholder,\n" +
+"    .swal2-popup .swal2-file::placeholder,\n" +
+"    .swal2-popup .swal2-textarea::placeholder {\n" +
+"      color: #cccccc; }\n" +
+"  .swal2-popup .swal2-range input {\n" +
+"    width: 80%; }\n" +
+"  .swal2-popup .swal2-range output {\n" +
+"    width: 20%;\n" +
+"    font-weight: 600;\n" +
+"    text-align: center; }\n" +
+"  .swal2-popup .swal2-range input,\n" +
+"  .swal2-popup .swal2-range output {\n" +
+"    height: 2.625em;\n" +
+"    margin: 1em auto;\n" +
+"    padding: 0;\n" +
+"    font-size: 1.125em;\n" +
+"    line-height: 2.625em; }\n" +
+"  .swal2-popup .swal2-input {\n" +
+"    height: 2.625em;\n" +
+"    padding: 0.75em; }\n" +
+"    .swal2-popup .swal2-input[type='number'] {\n" +
+"      max-width: 10em; }\n" +
+"  .swal2-popup .swal2-file {\n" +
+"    font-size: 1.125em; }\n" +
+"  .swal2-popup .swal2-textarea {\n" +
+"    height: 6.75em;\n" +
+"    padding: 0.75em; }\n" +
+"  .swal2-popup .swal2-select {\n" +
+"    min-width: 50%;\n" +
+"    max-width: 100%;\n" +
+"    padding: .375em .625em;\n" +
+"    color: #545454;\n" +
+"    font-size: 1.125em; }\n" +
+"  .swal2-popup .swal2-radio,\n" +
+"  .swal2-popup .swal2-checkbox {\n" +
+"    align-items: center;\n" +
+"    justify-content: center; }\n" +
+"    .swal2-popup .swal2-radio label,\n" +
+"    .swal2-popup .swal2-checkbox label {\n" +
+"      margin: 0 .6em;\n" +
+"      font-size: 1.125em; }\n" +
+"    .swal2-popup .swal2-radio input,\n" +
+"    .swal2-popup .swal2-checkbox input {\n" +
+"      margin: 0 .4em; }\n" +
+"  .swal2-popup .swal2-validationerror {\n" +
+"    display: none;\n" +
+"    align-items: center;\n" +
+"    justify-content: center;\n" +
+"    padding: 0.625em;\n" +
+"    background: #f0f0f0;\n" +
+"    color: #666666;\n" +
+"    font-size: 1em;\n" +
+"    font-weight: 300;\n" +
+"    overflow: hidden; }\n" +
+"    .swal2-popup .swal2-validationerror::before {\n" +
+"      display: inline-block;\n" +
+"      width: 1.5em;\n" +
+"      min-width: 1.5em;\n" +
+"      height: 1.5em;\n" +
+"      margin: 0 .625em;\n" +
+"      border-radius: 50%;\n" +
+"      background-color: #f27474;\n" +
+"      color: #fff;\n" +
+"      font-weight: 600;\n" +
+"      line-height: 1.5em;\n" +
+"      text-align: center;\n" +
+"      content: '!';\n" +
+"      zoom: normal; }\n" +
+"\n" +
+"@supports (-ms-accelerator: true) {\n" +
+"  .swal2-range input {\n" +
+"    width: 100% !important; }\n" +
+"  .swal2-range output {\n" +
+"    display: none; } }\n" +
+"\n" +
+"@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {\n" +
+"  .swal2-range input {\n" +
+"    width: 100% !important; }\n" +
+"  .swal2-range output {\n" +
+"    display: none; } }\n" +
+"\n" +
+"@-moz-document url-prefix() {\n" +
+"  .swal2-close:focus {\n" +
+"    outline: 2px solid rgba(50, 100, 150, 0.4); } }\n" +
+"\n" +
+".swal2-icon {\n" +
+"  position: relative;\n" +
+"  justify-content: center;\n" +
+"  width: 5em;\n" +
+"  height: 5em;\n" +
+"  margin: 1.25em auto 1.875em;\n" +
+"  border: .25em solid transparent;\n" +
+"  border-radius: 50%;\n" +
+"  line-height: 5em;\n" +
+"  cursor: default;\n" +
+"  box-sizing: content-box;\n" +
+"  -webkit-user-select: none;\n" +
+"     -moz-user-select: none;\n" +
+"      -ms-user-select: none;\n" +
+"          user-select: none;\n" +
+"  zoom: normal; }\n" +
+"  .swal2-icon-text {\n" +
+"    font-size: 3.75em; }\n" +
+"  .swal2-icon.swal2-error {\n" +
+"    border-color: #f27474; }\n" +
+"    .swal2-icon.swal2-error .swal2-x-mark {\n" +
+"      position: relative;\n" +
+"      flex-grow: 1; }\n" +
+"    .swal2-icon.swal2-error [class^='swal2-x-mark-line'] {\n" +
+"      display: block;\n" +
+"      position: absolute;\n" +
+"      top: 2.3125em;\n" +
+"      width: 2.9375em;\n" +
+"      height: .3125em;\n" +
+"      border-radius: .125em;\n" +
+"      background-color: #f27474; }\n" +
+"      .swal2-icon.swal2-error [class^='swal2-x-mark-line'][class$='left'] {\n" +
+"        left: 1.0625em;\n" +
+"        -webkit-transform: rotate(45deg);\n" +
+"                transform: rotate(45deg); }\n" +
+"      .swal2-icon.swal2-error [class^='swal2-x-mark-line'][class$='right'] {\n" +
+"        right: 1em;\n" +
+"        -webkit-transform: rotate(-45deg);\n" +
+"                transform: rotate(-45deg); }\n" +
+"  .swal2-icon.swal2-warning {\n" +
+"    border-color: #facea8;\n" +
+"    color: #f8bb86; }\n" +
+"  .swal2-icon.swal2-info {\n" +
+"    border-color: #9de0f6;\n" +
+"    color: #3fc3ee; }\n" +
+"  .swal2-icon.swal2-question {\n" +
+"    border-color: #c9dae1;\n" +
+"    color: #87adbd; }\n" +
+"  .swal2-icon.swal2-success {\n" +
+"    border-color: #a5dc86; }\n" +
+"    .swal2-icon.swal2-success [class^='swal2-success-circular-line'] {\n" +
+"      position: absolute;\n" +
+"      width: 3.75em;\n" +
+"      height: 7.5em;\n" +
+"      -webkit-transform: rotate(45deg);\n" +
+"              transform: rotate(45deg);\n" +
+"      border-radius: 50%; }\n" +
+"      .swal2-icon.swal2-success [class^='swal2-success-circular-line'][class$='left'] {\n" +
+"        top: -.4375em;\n" +
+"        left: -2.0635em;\n" +
+"        -webkit-transform: rotate(-45deg);\n" +
+"                transform: rotate(-45deg);\n" +
+"        -webkit-transform-origin: 3.75em 3.75em;\n" +
+"                transform-origin: 3.75em 3.75em;\n" +
+"        border-radius: 7.5em 0 0 7.5em; }\n" +
+"      .swal2-icon.swal2-success [class^='swal2-success-circular-line'][class$='right'] {\n" +
+"        top: -.6875em;\n" +
+"        left: 1.875em;\n" +
+"        -webkit-transform: rotate(-45deg);\n" +
+"                transform: rotate(-45deg);\n" +
+"        -webkit-transform-origin: 0 3.75em;\n" +
+"                transform-origin: 0 3.75em;\n" +
+"        border-radius: 0 7.5em 7.5em 0; }\n" +
+"    .swal2-icon.swal2-success .swal2-success-ring {\n" +
+"      position: absolute;\n" +
+"      top: -.25em;\n" +
+"      left: -.25em;\n" +
+"      width: 100%;\n" +
+"      height: 100%;\n" +
+"      border: 0.25em solid rgba(165, 220, 134, 0.3);\n" +
+"      border-radius: 50%;\n" +
+"      z-index: 2;\n" +
+"      box-sizing: content-box; }\n" +
+"    .swal2-icon.swal2-success .swal2-success-fix {\n" +
+"      position: absolute;\n" +
+"      top: .5em;\n" +
+"      left: 1.625em;\n" +
+"      width: .4375em;\n" +
+"      height: 5.625em;\n" +
+"      -webkit-transform: rotate(-45deg);\n" +
+"              transform: rotate(-45deg);\n" +
+"      z-index: 1; }\n" +
+"    .swal2-icon.swal2-success [class^='swal2-success-line'] {\n" +
+"      display: block;\n" +
+"      position: absolute;\n" +
+"      height: .3125em;\n" +
+"      border-radius: .125em;\n" +
+"      background-color: #a5dc86;\n" +
+"      z-index: 2; }\n" +
+"      .swal2-icon.swal2-success [class^='swal2-success-line'][class$='tip'] {\n" +
+"        top: 2.875em;\n" +
+"        left: .875em;\n" +
+"        width: 1.5625em;\n" +
+"        -webkit-transform: rotate(45deg);\n" +
+"                transform: rotate(45deg); }\n" +
+"      .swal2-icon.swal2-success [class^='swal2-success-line'][class$='long'] {\n" +
+"        top: 2.375em;\n" +
+"        right: .5em;\n" +
+"        width: 2.9375em;\n" +
+"        -webkit-transform: rotate(-45deg);\n" +
+"                transform: rotate(-45deg); }\n" +
+"\n" +
+".swal2-progresssteps {\n" +
+"  align-items: center;\n" +
+"  margin: 0 0 1.25em;\n" +
+"  padding: 0;\n" +
+"  font-weight: 600; }\n" +
+"  .swal2-progresssteps li {\n" +
+"    display: inline-block;\n" +
+"    position: relative; }\n" +
+"  .swal2-progresssteps .swal2-progresscircle {\n" +
+"    width: 2em;\n" +
+"    height: 2em;\n" +
+"    border-radius: 2em;\n" +
+"    background: #3085d6;\n" +
+"    color: #fff;\n" +
+"    line-height: 2em;\n" +
+"    text-align: center;\n" +
+"    z-index: 20; }\n" +
+"    .swal2-progresssteps .swal2-progresscircle:first-child {\n" +
+"      margin-left: 0; }\n" +
+"    .swal2-progresssteps .swal2-progresscircle:last-child {\n" +
+"      margin-right: 0; }\n" +
+"    .swal2-progresssteps .swal2-progresscircle.swal2-activeprogressstep {\n" +
+"      background: #3085d6; }\n" +
+"      .swal2-progresssteps .swal2-progresscircle.swal2-activeprogressstep ~ .swal2-progresscircle {\n" +
+"        background: #add8e6; }\n" +
+"      .swal2-progresssteps .swal2-progresscircle.swal2-activeprogressstep ~ .swal2-progressline {\n" +
+"        background: #add8e6; }\n" +
+"  .swal2-progresssteps .swal2-progressline {\n" +
+"    width: 2.5em;\n" +
+"    height: .4em;\n" +
+"    margin: 0 -1px;\n" +
+"    background: #3085d6;\n" +
+"    z-index: 10; }\n" +
+"\n" +
+"[class^='swal2'] {\n" +
+"  -webkit-tap-highlight-color: transparent; }\n" +
+"\n" +
+".swal2-show {\n" +
+"  -webkit-animation: swal2-show 0.3s;\n" +
+"          animation: swal2-show 0.3s; }\n" +
+"  .swal2-show.swal2-noanimation {\n" +
+"    -webkit-animation: none;\n" +
+"            animation: none; }\n" +
+"\n" +
+".swal2-hide {\n" +
+"  -webkit-animation: swal2-hide 0.15s forwards;\n" +
+"          animation: swal2-hide 0.15s forwards; }\n" +
+"  .swal2-hide.swal2-noanimation {\n" +
+"    -webkit-animation: none;\n" +
+"            animation: none; }\n" +
+"\n" +
+"[dir='rtl'] .swal2-close {\n" +
+"  right: auto;\n" +
+"  left: 0; }\n" +
+"\n" +
+".swal2-animate-success-icon .swal2-success-line-tip {\n" +
+"  -webkit-animation: swal2-animate-success-line-tip 0.75s;\n" +
+"          animation: swal2-animate-success-line-tip 0.75s; }\n" +
+"\n" +
+".swal2-animate-success-icon .swal2-success-line-long {\n" +
+"  -webkit-animation: swal2-animate-success-line-long 0.75s;\n" +
+"          animation: swal2-animate-success-line-long 0.75s; }\n" +
+"\n" +
+".swal2-animate-success-icon .swal2-success-circular-line-right {\n" +
+"  -webkit-animation: swal2-rotate-success-circular-line 4.25s ease-in;\n" +
+"          animation: swal2-rotate-success-circular-line 4.25s ease-in; }\n" +
+"\n" +
+".swal2-animate-error-icon {\n" +
+"  -webkit-animation: swal2-animate-error-icon 0.5s;\n" +
+"          animation: swal2-animate-error-icon 0.5s; }\n" +
+"  .swal2-animate-error-icon .swal2-x-mark {\n" +
+"    -webkit-animation: swal2-animate-error-x-mark 0.5s;\n" +
+"            animation: swal2-animate-error-x-mark 0.5s; }\n" +
+"\n" +
+"@-webkit-keyframes swal2-rotate-loading {\n" +
+"  0% {\n" +
+"    -webkit-transform: rotate(0deg);\n" +
+"            transform: rotate(0deg); }\n" +
+"  100% {\n" +
+"    -webkit-transform: rotate(360deg);\n" +
+"            transform: rotate(360deg); } }\n" +
+"\n" +
+"@keyframes swal2-rotate-loading {\n" +
+"  0% {\n" +
+"    -webkit-transform: rotate(0deg);\n" +
+"            transform: rotate(0deg); }\n" +
+"  100% {\n" +
+"    -webkit-transform: rotate(360deg);\n" +
+"            transform: rotate(360deg); } }");
+},{}]},{},[1])
+
