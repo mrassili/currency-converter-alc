@@ -18,7 +18,7 @@
 }
 
 .card-details {
-  width: 600px;
+  width: 100%;
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr 1fr calc(1fr - 30px);
