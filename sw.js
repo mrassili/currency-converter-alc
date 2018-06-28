@@ -10,7 +10,9 @@ const staticAssets = [
   "/index.html",
   //fonts
   "https://fonts.gstatic.com/s/sourcesanspro/v11/6xK3dSBYKcSV-LCoeQqfX1RYOo3qNa7lujVj9_mf.woff2",
-  "https://free.currencyconverterapi.com/api/v5/currencies"
+  "https://free.currencyconverterapi.com/api/v5/currencies",
+  //favicon
+  "/favicon.ico"
 ];
 
 self.addEventListener("install", event => {
