@@ -39,7 +39,7 @@ window.addEventListener('load', function () {
   });
   // Register Service Worker
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js').then(function (reg) {
+    navigator.serviceWorker.register('./sw.js').then(function (reg) {
       return console.log('Registration successful');
     }).catch(function () {
       return console.log('Registration failed');
