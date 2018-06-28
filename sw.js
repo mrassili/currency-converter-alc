@@ -3,7 +3,6 @@ const staticAssets = [
   //js
   "./",
   "./scripts/main.js",
-  "./scripts/bundle.js",
   //css
   "./styles/main.css",
   //html
