@@ -1,4 +1,4 @@
-const staticCache = "staticCache-v1";
+const staticCache = "staticCache-v8";
 const staticAssets = [
   //js
   "index.html",
@@ -25,8 +25,7 @@ self.addEventListener("activate", event => {
 });
 
 self.addEventListener("fetch", event => {
-  // try placing the sw in .tmp
-  console.log("fetch request :", event.request);
+  // offline-first
   event.respondWith(
     caches.match(event.request).then(cacheResponse => {
       return cacheResponse || fetch(event.request);
