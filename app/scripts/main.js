@@ -13,7 +13,7 @@ window.addEventListener('load', () => {
     .then(currencies => {
       let currencyName;
       let currencyCode;
-      let option; // `option` node to hold new currencies options being added
+      let option; // `option` node to hold new currencies' options being added
       for (const currency in currencies.results) {
         currencyName = currencies.results[currency].currencyName;
         currencyCode = currencies.results[currency].id;
@@ -30,7 +30,7 @@ window.addEventListener('load', () => {
   // Register Service Worker
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker
-      .register('/sw.js')
+      .register('./sw.js')
       .then(reg => console.log('Registration successful'))
       .catch(() => console.log('Registration failed'));
   }
@@ -57,7 +57,6 @@ convertBtn.addEventListener('click', () => {
       `https://free.currencyconverterapi.com/api/v5/convert?q=${src_currency}_${dest_currency}&compact=ultra`
     )
       .then(rateResp => {
-        console.log(rateResp);
         return rateResp.json();
       })
       .then(rate => {
@@ -76,9 +75,6 @@ convertBtn.addEventListener('click', () => {
           });
           return tx.complete;
         });
-        console.log(
-          'the fetch was done even though the rate is already stored!'
-        );
         return rate_value;
       })
       .catch(() => {
