@@ -1,0 +1,8 @@
+{
+  "short_name": "Currencies",
+  "name": "Currency Converter",
+  "start_url": "https://mrassili.github.io/currency-converter-alc/",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "theme_color": "#64CEAA"
+}
