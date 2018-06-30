@@ -1,6 +1,18 @@
 {
   "short_name": "Currencies",
   "name": "Currency Converter",
+  "icons": [
+    {
+      "src": "./curr_exch.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./curr_exch-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
   "start_url": "https://mrassili.github.io/currency-converter-alc/",
   "background_color": "#ffffff",
   "display": "standalone",
