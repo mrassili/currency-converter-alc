@@ -2,6 +2,7 @@
 
   This is a web application that allows users to convert currencies from their web browser quickly and conveniently.  
   Scaffolded with [`Yeoman`](https://github.com/yeoman/generator-webapp).
+  The app uses [Currency Converter API](https://www.currencyconverterapi.com/)'s currency api for fetching live conversion rates.
 
 ## Architecture
 
