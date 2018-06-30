@@ -5,9 +5,9 @@
 
 ## Architecture
 
-  The code for the app is available in `/currency-converter/app`, split into the following directories:
+  The source code for the app is available in `/currency-converter/app`, split into the following directories:
 
-  - `images`: contains all images used in the app.  
+  - `images`: contains all images used in the app if any.  
   - `scripts`: contains the JavaScript files.  
   - `styles`: contains .scss stylesheets.
 
@@ -16,10 +16,12 @@
   | Feature | Description |
   | ------- | ----------- |
   | Convert currencies | Quickly convert currencies using the most current exchange rates |
-  | Offline use | The app works offline as well as online |
-  | (BONUS) | Automatic detection of local currency by your location |
+  | Offline-first | The app works offline as well as online by storing the most recent used exchange rates |
 
 ## Dependencies
 
   - `gulp`  
   - `Babel`  
+  - `sweetalert2`  
+  - `idb`  
+  - `browserify`  
