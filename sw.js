@@ -17,6 +17,7 @@ const staticAssets = [
 self.addEventListener("install", event => {
   // Cache static resources
   event.waitUntil(
+    // .addAll is atomic, i.e. if one of the caches didn't go well the installation will fail
     caches.open(staticCache).then(cache => cache.addAll(staticAssets))
   );
 });

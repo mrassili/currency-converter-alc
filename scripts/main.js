@@ -21,20 +21,49 @@ window.addEventListener('load', function () {
   fetch('https://free.currencyconverterapi.com/api/v5/currencies').then(function (currennciesResp) {
     return currennciesResp.json();
   }).then(function (currencies) {
+    // a helper function to compare currencies' Id, for the purpose of sorting
+    function compareCurrencyId(a, b) {
+      return a.id < b.id ? -1 : 1;
+    }
     var currencyName = void 0;
     var currencyCode = void 0;
     var option = void 0; // `option` node to hold new currencies' options being added
-    for (var currency in currencies.results) {
-      currencyName = currencies.results[currency].currencyName;
-      currencyCode = currencies.results[currency].id;
-      option = document.createElement('option');
-      option.innerText = currencyCode + ' | ' + currencyName;
-      option.id = currencyCode;
-      // You can't append a node in two points of the document
-      // .cloneNode() makes a copy of the node
-      // with an option of `true` to clone the node's content as well
-      selectElements[0].appendChild(option.cloneNode(true));
-      selectElements[1].appendChild(option);
+
+    // I put all the objects representing each currency in an array
+    // in order to apply .sort() to it
+    var _iteratorNormalCompletion = true;
+    var _didIteratorError = false;
+    var _iteratorError = undefined;
+
+    try {
+      for (var _iterator = Object.values(currencies.results).sort(compareCurrencyId)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+        var currency = _step.value;
+
+        // currencies are sorted alphabetically by their id's
+        currencyName = currency.currencyName;
+        currencyCode = currency.id;
+        option = document.createElement('option');
+        option.innerText = currencyCode + ' | ' + currencyName;
+        option.id = currencyCode;
+        // You can't append a node in two points of the document
+        // .cloneNode() makes a copy of the node
+        // with an option of `true` to clone the node's content as well
+        selectElements[0].appendChild(option.cloneNode(true));
+        selectElements[1].appendChild(option);
+      }
+    } catch (err) {
+      _didIteratorError = true;
+      _iteratorError = err;
+    } finally {
+      try {
+        if (!_iteratorNormalCompletion && _iterator.return) {
+          _iterator.return();
+        }
+      } finally {
+        if (_didIteratorError) {
+          throw _iteratorError;
+        }
+      }
     }
   });
   // Register Service Worker
@@ -120,13 +149,12 @@ convertBtn.addEventListener('click', function () {
 
       if (isRateFound && storedRate)
         // rate already stored
-        resultingAmount.textContent = dest_currency + ' ' + (storedRate.rate * inputAmount.value).toFixed(2);else
+        resultingAmount.textContent = dest_currency + ' ' + (storedRate.rate * inputAmount.value).toFixed(2);
         /*
         rate not found in IDB
         if the client is online the rate will be fetched and added to idb
         if offline the client will be shown an alert
-        */
-        return fetchRate(isRateFound).then(function (fetchedRate) {
+        */else return fetchRate(isRateFound).then(function (fetchedRate) {
           return resultingAmount.textContent = dest_currency + ' ' + (fetchedRate * inputAmount.value).toFixed(2);
         });
     });
