@@ -8,7 +8,6 @@
 
   The source code for the app is available in `/currency-converter/app`, split into the following directories:
 
-  - `images`: contains all images used in the app if any.  
   - `scripts`: contains the JavaScript files.  
   - `styles`: contains .scss stylesheets.
 
