@@ -27,8 +27,8 @@
 
 ## Dependencies
 
-  - `gulp`  
+  - `Gulp`  
   - `Babel`  
   - `sweetalert2`  
-  - `idb`  
+  - `IndexedDB`  
   - `browserify`  
