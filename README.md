@@ -16,7 +16,7 @@
   The source code for the app is available in `/currency-converter/app`, split into the following directories:
 
   - `scripts`: contains the JavaScript files.  
-  - `styles`: contains .scss stylesheets.
+  - `styles`: contains Sass (.scss) files.
 
 ## Features
 
