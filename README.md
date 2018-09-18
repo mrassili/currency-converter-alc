@@ -7,7 +7,7 @@
 ## Local Development
 
   - Clone or fork the repo
-  - Go into the repo's directory
+  - Go into the repo's directory : `cd currency-converter-alc`
   - Run `npm install`
   - Run `npm run dev`
 
