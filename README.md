@@ -23,7 +23,7 @@
   | Feature | Description |
   | ------- | ----------- |
   | Convert currencies | Quickly convert currencies using the most current exchange rates |
-  | Offline-first | The app works offline as well as online by storing the most recent used exchange rates |
+  | Offline-first | The app works offline as well as online by persisting recently used exchange rates to IndexedDB |
 
 ## Dependencies
 
